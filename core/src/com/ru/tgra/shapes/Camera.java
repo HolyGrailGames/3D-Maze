@@ -8,22 +8,42 @@ import com.badlogic.gdx.utils.BufferUtils;
 public class Camera 
 {
 	
-	Point3D eye;
+	public Point3D eye;
 	Vector3D u;
 	Vector3D v;
 	Vector3D n;
 	
+	boolean orthographic;
+	
+	float left;
+	float right;
+	float bottom;
+	float top;
+	float near;
+	float far;
+	
 	private int viewMatrixPointer;
+	private int projectionMatrixPointer;
 	private FloatBuffer matrixBuffer;
 	
-	public Camera(int matrixPointer) {
+	public Camera(int matrixPointer, int projectionMatrixPointer) {
 		this.viewMatrixPointer = matrixPointer;
+		this.projectionMatrixPointer = projectionMatrixPointer;
 		matrixBuffer = BufferUtils.newFloatBuffer(16);
 		
 		eye = new Point3D();
 		u = new Vector3D(1, 0, 0);
 		v = new Vector3D(0, 1, 0);
 		n = new Vector3D(0, 0, 1);
+		
+		orthographic = true;
+		
+		this.left = -1;
+		this.right = 1;
+		this.bottom = -1;
+		this.top = 1;
+		this.near = -1;
+		this.far = 1;
 	}
 	
 	public void look(Point3D eye, Point3D center, Vector3D up) {
@@ -33,6 +53,10 @@ public class Camera
 		n.normalize();
 		u.normalize();
 		v = n.cross(u);
+	}
+	
+	public void setEye(float x, float y, float z) {
+		eye.set(x, y, z);
 	}
 	
 	public void slide(float delU, float delV, float delN) {
@@ -71,10 +95,51 @@ public class Camera
 		v.set(t.x * s + v.x * c,  t.y * s + v.y * c,  t.z * s + v.z * c);
 	}
 	
-	public void setShaderMatrix() {
-		Vector3D minusEye = new Vector3D(-eye.x, -eye.y, -eye.z);
+	public void orthographicProjection(float left, float right, float bottom, float top, float near, float far) {
+		this.left = left;
+		this.right = right;
+		this.bottom = bottom;
+		this.top = top;
+		this.near = near;
+		this.far = far;
+		orthographic = true;
+	}
+	
+	public void perspectiveProjection(float fov, float ratio, float near, float far) {
+		this.top = near * (float)Math.tan(((double)fov / 2.0f) * Math.PI / 180.0f);	 // N*tan(fov/2)
+		this.bottom = -top;
+		this.right = ratio * top;
+		this.left = -right;
+		this.near = near;
+		this.far = far;
+		
+		orthographic = false;
+	}
+	
+	public void setShaderMatrices() {
 		
 		float[] pm = new float[16];
+		
+		if (orthographic) {
+			pm[0] = 2.0f / (right - left); pm[4] = 0.0f; pm[8] = 0.0f; pm[12] = -(right + left) / (right - left);
+			pm[1] = 0.0f; pm[5] = 2.0f / (top - bottom); pm[9] = 0.0f; pm[13] = -(top + bottom) / (top - bottom);
+			pm[2] = 0.0f; pm[6] = 0.0f; pm[10] = 2.0f / (near - far); pm[14] = (near + far) / (near - far);
+			pm[3] = 0.0f; pm[7] = 0.0f; pm[11] = 0.0f; pm[15] = 1.0f;
+		}
+		else {
+			pm[0] = (2.0f * near) / (right - left); pm[4] = 0.0f; pm[8] = (right + left) / (right - left); pm[12] = 0.0f;
+			pm[1] = 0.0f; pm[5] = (2.0f * near) / (top - bottom); pm[9] = (top + bottom) / (top - bottom); pm[13] = 0.0f;
+			pm[2] = 0.0f; pm[6] = 0.0f; pm[10] = -(far + near) / (far - near); pm[14] = -(2.0f * far * near) / (far - near);
+			pm[3] = 0.0f; pm[7] = 0.0f; pm[11] = -1.0f; pm[15] = 0.0f;
+		}
+		
+		
+		matrixBuffer = BufferUtils.newFloatBuffer(16);
+		matrixBuffer.put(pm);
+		matrixBuffer.rewind();
+		Gdx.gl.glUniformMatrix4fv(projectionMatrixPointer, 1, false, matrixBuffer);
+		
+		Vector3D minusEye = new Vector3D(-eye.x, -eye.y, -eye.z);
 		
 		pm[0] = u.x; pm[4] = u.y; pm[8] = u.z; pm[12] = minusEye.dot(u);
 		pm[1] = v.x; pm[5] = v.y; pm[9] = v.z; pm[13] = minusEye.dot(v);

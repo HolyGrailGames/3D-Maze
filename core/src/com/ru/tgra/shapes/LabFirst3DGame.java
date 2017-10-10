@@ -27,9 +27,14 @@ public class LabFirst3DGame extends ApplicationAdapter implements InputProcessor
 	private int projectionMatrixLoc;
 
 	private int colorLoc;
-
-	private Camera cam;
 	
+	private float angle;
+	
+	private Camera cam;
+	private Camera orthoCam;
+	
+	private float fov = 90.0f;
+
 	//private ModelMatrix modelMatrix;
 
 	@Override
@@ -72,8 +77,7 @@ public class LabFirst3DGame extends ApplicationAdapter implements InputProcessor
 		colorLoc				= Gdx.gl.glGetUniformLocation(renderingProgramID, "u_color");
 
 		Gdx.gl.glUseProgram(renderingProgramID);
-
-		OrthographicProjection3D(0, Gdx.graphics.getWidth(), 0, Gdx.graphics.getHeight(), -1, 1);
+		
 /*
 		float[] mm = new float[16];
 
@@ -104,14 +108,14 @@ public class LabFirst3DGame extends ApplicationAdapter implements InputProcessor
 
 		Gdx.gl.glEnable(GL20.GL_DEPTH_TEST);
 
-		//OrthographicProjection3D(-2, 2, -2, 2, 1, 100);
-		PerspctiveProjection3D();
-		cam = new Camera(viewMatrixLoc);
-		cam.look(new Point3D(-13f, 7f, 9f), new Point3D(0,0,0), new Vector3D(0,1,0));
+		cam = new Camera(viewMatrixLoc, projectionMatrixLoc);
+		cam.look(new Point3D(-3f, 2f, 3f), new Point3D(0,3,0), new Vector3D(0,1,0));
 		
+		orthoCam = new Camera(viewMatrixLoc, projectionMatrixLoc);
+		orthoCam.orthographicProjection(-10, 10, -10, 10, 3.0f, 100);
 	}
 
-	private void handleInput(float deltaTime)
+	private void input(float deltaTime)
 	{
 		if(Gdx.input.isKeyPressed(Input.Keys.LEFT)) {
 			cam.yaw(90.0f * deltaTime);
@@ -137,7 +141,6 @@ public class LabFirst3DGame extends ApplicationAdapter implements InputProcessor
 		if(Gdx.input.isKeyPressed(Input.Keys.S)) {
 			cam.slide(0, 0, 3.0f * deltaTime);
 		}
-
 		if(Gdx.input.isKeyPressed(Input.Keys.R)) {
 			cam.slide(0, 3.0f * deltaTime, 0);
 		}
@@ -150,6 +153,13 @@ public class LabFirst3DGame extends ApplicationAdapter implements InputProcessor
 		if(Gdx.input.isKeyPressed(Input.Keys.E)) {
 			cam.roll(90.0f * deltaTime);
 		}
+		
+		if(Gdx.input.isKeyPressed(Input.Keys.T)) {
+			fov -= 30.0f * deltaTime;
+		}
+		if(Gdx.input.isKeyPressed(Input.Keys.G)) {
+			fov += 30.0f * deltaTime;
+		}
 	}
 	
 	private void update()
@@ -157,9 +167,9 @@ public class LabFirst3DGame extends ApplicationAdapter implements InputProcessor
 		float deltaTime = Gdx.graphics.getDeltaTime();
 
 		//angle += 180.0f * deltaTime;
-
-		handleInput(deltaTime);
 		
+		input(deltaTime);
+
 		//do all updates to the game
 	}
 	
@@ -167,85 +177,88 @@ public class LabFirst3DGame extends ApplicationAdapter implements InputProcessor
 	{
 		//do all actual drawing and rendering here
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
-		Gdx.gl.glUniform4f(colorLoc, 0.9f, 0.3f, 0.1f, 1.0f);
 		
-		cam.setShaderMatrix();
-		ModelMatrix.main.pushMatrix();
-		ModelMatrix.main.loadIdentityMatrix();
-		
-		//ModelMatrix.main.addRotationZ(angle);
-		
-		
-		int maxLevel = 9;
-		
-		for(int level = 0; level < maxLevel; level++) {
+		for (int viewNum = 0; viewNum < 2; viewNum++) {
+			if (viewNum == 0) {
+				Gdx.gl.glViewport(0, 0, Gdx.graphics.getWidth() / 2, Gdx.graphics.getHeight());
+				cam.perspectiveProjection(fov, 1.0f, 0.4f, 100.0f);
+				cam.setShaderMatrices();
+			}
+			else {
+				Gdx.gl.glViewport(Gdx.graphics.getWidth() / 2, 0, Gdx.graphics.getWidth() / 2, Gdx.graphics.getHeight());
+				//orthoCam.look(new Point3D(cam.eye.x, 20.0f, cam.eye.z), cam.eye, new Vector(0,0,-1));
+				orthoCam.look(new Point3D(7.0f, 40.0f, -7.0f), new Point3D(7.0f, 0.0f, -7.0f), new Vector3D(0, 0, -1));
+				orthoCam.setShaderMatrices();
+			}
 			
-			ModelMatrix.main.addTranslation(0.55f, 1.0f, -0.55f);
-			ModelMatrix.main.pushMatrix();
-			for(int i = 0; i < maxLevel - level; i++) {
-				ModelMatrix.main.addTranslation(1.1f, 0, 0);
+			//BoxGraphic.drawOutlineCube();
+			//SphereGraphic.drawSolidSphere();
+			//SphereGraphic.drawOutlineSphere();
+			
+			ModelMatrix.main.loadIdentityMatrix();
+			
+			//ModelMatrix.main.addRotationZ(angle);
+			
+			int maxLevel = 9;
+			
+			for (int pyramidNr = 0; pyramidNr < 2; pyramidNr++) {
 				ModelMatrix.main.pushMatrix();
-				for(int j = 0; j < maxLevel - level; j++) {
-					ModelMatrix.main.addTranslation(0,  0,  -1.1f);
-					//ModelMatrix.main.pushMatrix();
-					//ModelMatrix.main.addScale(0.5f,  0.5f,  0.5f);
-					ModelMatrix.main.setShaderMatrix();
-					SphereGraphic.drawSolidSphere();
-					//ModelMatrix.main.popMatrix();
-					//BoxGraphic.drawSolidCube();
+				if(pyramidNr == 0) {
+					Gdx.gl.glUniform4f(colorLoc, 0.8f, 0.8f, 0.2f, 1.0f);
+					ModelMatrix.main.addTranslation(0.0f, 0.0f, -7.0f);
+				}
+				else {
+					Gdx.gl.glUniform4f(colorLoc, 0.5f, 0.3f, 1.0f, 1.0f);
+					ModelMatrix.main.addTranslation(0.0f, 0.0f, 7.0f);
+				}
+				ModelMatrix.main.pushMatrix();
+				for (int level = 0; level < maxLevel; level++) {
+					ModelMatrix.main.addTranslation(0.55f, 1.0f, -0.55f);
+					
+					ModelMatrix.main.pushMatrix();
+					for (int i = 0; i < maxLevel-level; i++) {
+						ModelMatrix.main.addTranslation(1.1f, 0, 0);
+						ModelMatrix.main.pushMatrix();
+						for (int j = 0; j < maxLevel-level; j++) {
+							ModelMatrix.main.addTranslation(0, 0, -1.1f);
+							ModelMatrix.main.pushMatrix();
+							if (i % 2 == 0) {
+								ModelMatrix.main.addScale(0.2f, 1, 1);
+							}
+							else {
+								ModelMatrix.main.addScale(1, 1, 0.2f);
+							}
+							ModelMatrix.main.setShaderMatrix();
+							//SphereGraphic.drawSolidSphere();
+							BoxGraphic.drawSolidCube();
+							ModelMatrix.main.popMatrix();
+						}
+						ModelMatrix.main.popMatrix();
+					}
+					ModelMatrix.main.popMatrix();
 				}
 				ModelMatrix.main.popMatrix();
+				ModelMatrix.main.popMatrix();
 			}
-			ModelMatrix.main.popMatrix();
+			
+			if (viewNum == 1) {
+				Gdx.gl.glUniform4f(colorLoc, 1.0f, 0.3f, 0.1f, 1.0f);
+				
+				ModelMatrix.main.pushMatrix();
+				ModelMatrix.main.addTranslation(cam.eye.x, cam.eye.y, cam.eye.z);
+				ModelMatrix.main.setShaderMatrix();
+				BoxGraphic.drawSolidCube();
+				ModelMatrix.main.popMatrix();
+			}
 		}
-		ModelMatrix.main.popMatrix();
 	}
 
 	@Override
 	public void render () {
+		
 		//put the code inside the update and display methods, depending on the nature of the code
 		update();
 		display();
-
-	}
-
-
-	private void OrthographicProjection3D(float left, float right, float bottom, float top, float near, float far) {
-		float[] pm = new float[16];
-
-		pm[0] = 2.0f / (right - left); pm[4] = 0.0f; pm[8] = 0.0f; pm[12] = -(right + left) / (right - left);
-		pm[1] = 0.0f; pm[5] = 2.0f / (top - bottom); pm[9] = 0.0f; pm[13] = -(top + bottom) / (top - bottom);
-		pm[2] = 0.0f; pm[6] = 0.0f; pm[10] = 2.0f / (near - far); pm[14] = (near + far) / (near - far);
-		pm[3] = 0.0f; pm[7] = 0.0f; pm[11] = 0.0f; pm[15] = 1.0f;
-
-		matrixBuffer = BufferUtils.newFloatBuffer(16);
-		matrixBuffer.put(pm);
-		matrixBuffer.rewind();
-		Gdx.gl.glUniformMatrix4fv(projectionMatrixLoc, 1, false, matrixBuffer);
-
-		pm[0] = 1.0f; pm[4] = 0.0f; pm[8] = 0.0f; pm[12] = 0.0f;
-		pm[1] = 0.0f; pm[5] = 1.0f; pm[9] = 0.0f; pm[13] = 0.0f;
-		pm[2] = 0.0f; pm[6] = 0.0f; pm[10] = 1.0f; pm[14] = 0.0f;
-		pm[3] = 0.0f; pm[7] = 0.0f; pm[11] = 0.0f; pm[15] = 1.0f;
-
-		matrixBuffer = BufferUtils.newFloatBuffer(16);
-		matrixBuffer.put(pm);
-		matrixBuffer.rewind();
-		Gdx.gl.glUniformMatrix4fv(viewMatrixLoc, 1, false, matrixBuffer);
-	}
-
-	private void PerspctiveProjection3D() {
-		float[] pm = new float[16];
-
-		pm[0] = 1.0f; pm[4] = 0.0f; pm[8] = 0.0f; pm[12] = 0.0f;
-		pm[1] = 0.0f; pm[5] = 1.0f; pm[9] = 0.0f; pm[13] = 0.0f;
-		pm[2] = 0.0f; pm[6] = 0.0f; pm[10] = -1.02f; pm[14] = -2.02f;
-		pm[3] = 0.0f; pm[7] = 0.0f; pm[11] = -1.0f; pm[15] = 0.0f;
-
-		matrixBuffer = BufferUtils.newFloatBuffer(16);
-		matrixBuffer.put(pm);
-		matrixBuffer.rewind();
-		Gdx.gl.glUniformMatrix4fv(projectionMatrixLoc, 1, false, matrixBuffer);
 
 	}
 
