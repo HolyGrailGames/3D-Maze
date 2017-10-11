@@ -5,6 +5,7 @@ import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.InputProcessor;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 
 import java.nio.FloatBuffer;
@@ -180,14 +181,15 @@ public class LabFirst3DGame extends ApplicationAdapter implements InputProcessor
 		
 		for (int viewNum = 0; viewNum < 2; viewNum++) {
 			if (viewNum == 0) {
-				Gdx.gl.glViewport(0, 0, Gdx.graphics.getWidth() / 2, Gdx.graphics.getHeight());
+				Gdx.gl.glViewport(0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 				cam.perspectiveProjection(fov, 1.0f, 0.4f, 100.0f);
 				cam.setShaderMatrices();
 			}
 			else {
-				Gdx.gl.glViewport(Gdx.graphics.getWidth() / 2, 0, Gdx.graphics.getWidth() / 2, Gdx.graphics.getHeight());
-				//orthoCam.look(new Point3D(cam.eye.x, 20.0f, cam.eye.z), cam.eye, new Vector(0,0,-1));
-				orthoCam.look(new Point3D(7.0f, 40.0f, -7.0f), new Point3D(7.0f, 0.0f, -7.0f), new Vector3D(0, 0, -1));
+				Gdx.gl.glClear(GL20.GL_DEPTH_BUFFER_BIT);
+				Gdx.gl.glViewport(Gdx.graphics.getWidth() / 4 * 3, Gdx.graphics.getHeight()/4 * 3, Gdx.graphics.getWidth() / 4, Gdx.graphics.getHeight()/4);
+				orthoCam.look(new Point3D(cam.eye.x, 20.0f, cam.eye.z), cam.eye, new Vector3D(0,0,-1));
+				//orthoCam.look(new Point3D(7.0f, 40.0f, -7.0f), new Point3D(7.0f, 0.0f, -7.0f), new Vector3D(0, 0, -1));
 				orthoCam.setShaderMatrices();
 			}
 			
@@ -242,6 +244,7 @@ public class LabFirst3DGame extends ApplicationAdapter implements InputProcessor
 			}
 			
 			ModelMatrix.main.pushMatrix();
+			Gdx.gl.glUniform4f(colorLoc, Color.RED.r, Color.RED.g, Color.RED.b, 1.0f);
 			ModelMatrix.main.addTranslation(0.0f, -0.5f, 0.0f);
 			ModelMatrix.main.addScale(100.0f, 1.0f, 100.0f);
 			ModelMatrix.main.setShaderMatrix();
@@ -262,7 +265,7 @@ public class LabFirst3DGame extends ApplicationAdapter implements InputProcessor
 
 	@Override
 	public void render () {
-		
+		Gdx.graphics.setTitle("Ultimate 3D Maze | FPS: " + Gdx.graphics.getFramesPerSecond());
 		//put the code inside the update and display methods, depending on the nature of the code
 		update();
 		display();
