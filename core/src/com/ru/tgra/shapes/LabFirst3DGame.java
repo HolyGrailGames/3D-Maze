@@ -33,7 +33,12 @@ public class LabFirst3DGame extends ApplicationAdapter implements InputProcessor
 	
 	private Camera cam;
 	private Camera orthoCam;
+	
+	// Maze generating stuff
 	private MazeGenerator generator;
+	private Node[] nodes;
+	private static final int MAZE_WIDTH = 25;
+	private static final int MAZE_HEIGHT = 25;
 	
 	private float fov = 90.0f;
 
@@ -111,11 +116,10 @@ public class LabFirst3DGame extends ApplicationAdapter implements InputProcessor
 		Gdx.gl.glEnable(GL20.GL_DEPTH_TEST);
 		
 		// Initialize a new maze;
-		generator = new MazeGenerator(51, 51);
+		generator = new MazeGenerator(MAZE_WIDTH, MAZE_HEIGHT);
 		generator.init();
 		generator.generate();
-		
-		
+		nodes = generator.getNodes();
 		
 		cam = new Camera(viewMatrixLoc, projectionMatrixLoc);
 		cam.look(new Point3D(-3f, 2f, 3f), new Point3D(0,3,0), new Vector3D(0,1,0));
@@ -201,58 +205,9 @@ public class LabFirst3DGame extends ApplicationAdapter implements InputProcessor
 				orthoCam.setShaderMatrices();
 			}
 			
-			
-			
-			
-			//BoxGraphic.drawOutlineCube();
-			//SphereGraphic.drawSolidSphere();
-			//SphereGraphic.drawOutlineSphere();
-			
 			ModelMatrix.main.loadIdentityMatrix();
 			
-			//ModelMatrix.main.addRotationZ(angle);
-			
-			int maxLevel = 9;
-			
-			for (int pyramidNr = 0; pyramidNr < 2; pyramidNr++) {
-				ModelMatrix.main.pushMatrix();
-				if(pyramidNr == 0) {
-					Gdx.gl.glUniform4f(colorLoc, 0.8f, 0.8f, 0.2f, 1.0f);
-					ModelMatrix.main.addTranslation(0.0f, 0.0f, -7.0f);
-				}
-				else {
-					Gdx.gl.glUniform4f(colorLoc, 0.5f, 0.3f, 1.0f, 1.0f);
-					ModelMatrix.main.addTranslation(0.0f, 0.0f, 7.0f);
-				}
-				ModelMatrix.main.pushMatrix();
-				for (int level = 0; level < maxLevel; level++) {
-					ModelMatrix.main.addTranslation(0.55f, 1.0f, -0.55f);
-					
-					ModelMatrix.main.pushMatrix();
-					for (int i = 0; i < maxLevel-level; i++) {
-						ModelMatrix.main.addTranslation(1.1f, 0, 0);
-						ModelMatrix.main.pushMatrix();
-						for (int j = 0; j < maxLevel-level; j++) {
-							ModelMatrix.main.addTranslation(0, 0, -1.1f);
-							ModelMatrix.main.pushMatrix();
-							if (i % 2 == 0) {
-								ModelMatrix.main.addScale(0.2f, 1, 1);
-							}
-							else {
-								ModelMatrix.main.addScale(1, 1, 0.2f);
-							}
-							ModelMatrix.main.setShaderMatrix();
-							//SphereGraphic.drawSolidSphere();
-							BoxGraphic.drawSolidCube();
-							ModelMatrix.main.popMatrix();
-						}
-						ModelMatrix.main.popMatrix();
-					}
-					ModelMatrix.main.popMatrix();
-				}
-				ModelMatrix.main.popMatrix();
-				ModelMatrix.main.popMatrix();
-			}
+			drawMaze();
 			
 			ModelMatrix.main.pushMatrix();
 			Gdx.gl.glUniform4f(colorLoc, Color.RED.r, Color.RED.g, Color.RED.b, 1.0f);
@@ -274,6 +229,21 @@ public class LabFirst3DGame extends ApplicationAdapter implements InputProcessor
 		}
 	}
 
+	public void drawMaze() {
+		Gdx.gl.glUniform4f(colorLoc, 0.8f, 0.8f, 0.2f, 1.0f);
+		for (int i = 0; i < MAZE_WIDTH; i++) {
+			for (int j = 0; j < MAZE_HEIGHT; j++) {
+				if (nodes[j + i * MAZE_WIDTH].c == '#') {
+					ModelMatrix.main.pushMatrix();
+					ModelMatrix.main.addTranslation(i, 1, j);
+					ModelMatrix.main.setShaderMatrix();
+					BoxGraphic.drawSolidCube();
+					ModelMatrix.main.popMatrix();
+				}
+			}
+		}
+	}
+	
 	@Override
 	public void render () {
 		Gdx.graphics.setTitle("Ultimate 3D Maze | FPS: " + Gdx.graphics.getFramesPerSecond());
@@ -330,6 +300,54 @@ public class LabFirst3DGame extends ApplicationAdapter implements InputProcessor
 		// TODO Auto-generated method stub
 		return false;
 	}
-
+	
+	// Put it here in case we want to look at code in our spare time, because theres always lots of
+	// spare time to play with pyramid code.
+	void drawPyramid() {
+		/*
+		int maxLevel = 9;
+		
+		for (int pyramidNr = 0; pyramidNr < 2; pyramidNr++) {
+			ModelMatrix.main.pushMatrix();
+			if(pyramidNr == 0) {
+				Gdx.gl.glUniform4f(colorLoc, 0.8f, 0.8f, 0.2f, 1.0f);
+				ModelMatrix.main.addTranslation(0.0f, 0.0f, -7.0f);
+			}
+			else {
+				Gdx.gl.glUniform4f(colorLoc, 0.5f, 0.3f, 1.0f, 1.0f);
+				ModelMatrix.main.addTranslation(0.0f, 0.0f, 7.0f);
+			}
+			ModelMatrix.main.pushMatrix();
+			for (int level = 0; level < maxLevel; level++) {
+				ModelMatrix.main.addTranslation(0.55f, 1.0f, -0.55f);
+				
+				ModelMatrix.main.pushMatrix();
+				for (int i = 0; i < maxLevel-level; i++) {
+					ModelMatrix.main.addTranslation(1.1f, 0, 0);
+					ModelMatrix.main.pushMatrix();
+					for (int j = 0; j < maxLevel-level; j++) {
+						ModelMatrix.main.addTranslation(0, 0, -1.1f);
+						ModelMatrix.main.pushMatrix();
+						if (i % 2 == 0) {
+							ModelMatrix.main.addScale(0.2f, 1, 1);
+						}
+						else {
+							ModelMatrix.main.addScale(1, 1, 0.2f);
+						}
+						ModelMatrix.main.setShaderMatrix();
+						//SphereGraphic.drawSolidSphere();
+						BoxGraphic.drawSolidCube();
+						ModelMatrix.main.popMatrix();
+					}
+					ModelMatrix.main.popMatrix();
+				}
+				ModelMatrix.main.popMatrix();
+			}
+			ModelMatrix.main.popMatrix();
+			ModelMatrix.main.popMatrix();
+		}
+		
+		*/
+	}
 
 }

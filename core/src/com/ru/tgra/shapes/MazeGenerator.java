@@ -172,4 +172,8 @@ public class MazeGenerator {
 		while ( ( last = link( last ) ) != start );
 		draw( );
 	}
+	
+	Node[] getNodes() {
+		return this.nodes;
+	}
 }
