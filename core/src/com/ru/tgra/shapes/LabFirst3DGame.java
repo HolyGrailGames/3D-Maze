@@ -241,6 +241,13 @@ public class LabFirst3DGame extends ApplicationAdapter implements InputProcessor
 				ModelMatrix.main.popMatrix();
 			}
 			
+			ModelMatrix.main.pushMatrix();
+			ModelMatrix.main.addTranslation(0.0f, -0.5f, 0.0f);
+			ModelMatrix.main.addScale(100.0f, 1.0f, 100.0f);
+			ModelMatrix.main.setShaderMatrix();
+			BoxGraphic.drawSolidCube();
+			ModelMatrix.main.popMatrix();
+			
 			if (viewNum == 1) {
 				Gdx.gl.glUniform4f(colorLoc, 1.0f, 0.3f, 0.1f, 1.0f);
 				
