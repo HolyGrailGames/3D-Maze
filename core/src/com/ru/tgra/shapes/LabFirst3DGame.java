@@ -236,6 +236,7 @@ public class LabFirst3DGame extends ApplicationAdapter implements InputProcessor
 				if (nodes[j + i * MAZE_WIDTH].c == '#') {
 					ModelMatrix.main.pushMatrix();
 					ModelMatrix.main.addTranslation(i, 1, j);
+					ModelMatrix.main.addScale(1.0f, 3.0f, 1.0f);
 					ModelMatrix.main.setShaderMatrix();
 					BoxGraphic.drawSolidCube();
 					ModelMatrix.main.popMatrix();
