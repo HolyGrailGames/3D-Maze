@@ -1,17 +1,21 @@
 package com.ru.tgra.shapes;
 
 public class Node {
-	public Point3D position;
-	public float size;
-	public Node parent;
-	public int dirs;
-	public boolean isWall;
+
+	int x, y; //Node position - little waste of memory, but it allows faster generation
+	Node parent; //Pointer to parent node
+	char c; //Character to be displayed
+	char dirs; //Directions that still haven't been explored
 	
-	public Node(Point3D position, float size, Node parent, int dirs, boolean isWall) {
-		this.position = position;
-		this.size = size;
+	public Node(int x, int y, Node parent, char c, char dirs) {
+		this.x = x;
+		this.y = y;
 		this.parent = parent;
+		this.c = c;
 		this.dirs = dirs;
-		this.isWall = isWall;
+	}
+	
+	public Node() {
+		// Default constructor intentionally left empty
 	}
 }

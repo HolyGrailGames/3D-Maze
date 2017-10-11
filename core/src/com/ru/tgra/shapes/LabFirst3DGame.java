@@ -33,6 +33,7 @@ public class LabFirst3DGame extends ApplicationAdapter implements InputProcessor
 	
 	private Camera cam;
 	private Camera orthoCam;
+	private MazeGenerator generator;
 	
 	private float fov = 90.0f;
 
@@ -108,7 +109,14 @@ public class LabFirst3DGame extends ApplicationAdapter implements InputProcessor
 		ModelMatrix.main.setShaderMatrix(modelMatrixLoc);
 
 		Gdx.gl.glEnable(GL20.GL_DEPTH_TEST);
-
+		
+		// Initialize a new maze;
+		generator = new MazeGenerator(51, 51);
+		generator.init();
+		generator.generate();
+		
+		
+		
 		cam = new Camera(viewMatrixLoc, projectionMatrixLoc);
 		cam.look(new Point3D(-3f, 2f, 3f), new Point3D(0,3,0), new Vector3D(0,1,0));
 		
@@ -192,6 +200,9 @@ public class LabFirst3DGame extends ApplicationAdapter implements InputProcessor
 				//orthoCam.look(new Point3D(7.0f, 40.0f, -7.0f), new Point3D(7.0f, 0.0f, -7.0f), new Vector3D(0, 0, -1));
 				orthoCam.setShaderMatrices();
 			}
+			
+			
+			
 			
 			//BoxGraphic.drawOutlineCube();
 			//SphereGraphic.drawSolidSphere();
