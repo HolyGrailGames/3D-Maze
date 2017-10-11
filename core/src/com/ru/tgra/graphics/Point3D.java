@@ -1,4 +1,4 @@
-package com.ru.tgra.shapes;
+package com.ru.tgra.graphics;
 
 public class Point3D {
 

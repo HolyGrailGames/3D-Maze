@@ -1,4 +1,4 @@
-package com.ru.tgra.shapes;
+package com.ru.tgra.graphics;
 
 import java.nio.FloatBuffer;
 
@@ -22,13 +22,9 @@ public class Camera
 	float near;
 	float far;
 	
-	private int viewMatrixPointer;
-	private int projectionMatrixPointer;
 	private FloatBuffer matrixBuffer;
 	
-	public Camera(int matrixPointer, int projectionMatrixPointer) {
-		this.viewMatrixPointer = matrixPointer;
-		this.projectionMatrixPointer = projectionMatrixPointer;
+	public Camera() {
 		matrixBuffer = BufferUtils.newFloatBuffer(16);
 		
 		eye = new Point3D();
@@ -116,8 +112,23 @@ public class Camera
 		orthographic = false;
 	}
 	
-	public void setShaderMatrices() {
+	public FloatBuffer getViewMatrix() {
+		float[] pm = new float[16];
 		
+		Vector3D minusEye = new Vector3D(-eye.x, -eye.y, -eye.z);
+		
+		pm[0] = u.x; pm[4] = u.y; pm[8] = u.z; pm[12] = minusEye.dot(u);
+		pm[1] = v.x; pm[5] = v.y; pm[9] = v.z; pm[13] = minusEye.dot(v);
+		pm[2] = n.x; pm[6] = n.y; pm[10] = n.z; pm[14] = minusEye.dot(n);
+		pm[3] = 0.0f; pm[7] = 0.0f; pm[11] = 0.0f; pm[15] = 1.0f;
+		
+		matrixBuffer.put(pm);
+		matrixBuffer.rewind();
+		
+		return matrixBuffer;
+	}
+	
+	public FloatBuffer getProjectionMatrix() {
 		float[] pm = new float[16];
 		
 		if (orthographic) {
@@ -137,19 +148,7 @@ public class Camera
 		matrixBuffer = BufferUtils.newFloatBuffer(16);
 		matrixBuffer.put(pm);
 		matrixBuffer.rewind();
-		Gdx.gl.glUniformMatrix4fv(projectionMatrixPointer, 1, false, matrixBuffer);
 		
-		Vector3D minusEye = new Vector3D(-eye.x, -eye.y, -eye.z);
-		
-		pm[0] = u.x; pm[4] = u.y; pm[8] = u.z; pm[12] = minusEye.dot(u);
-		pm[1] = v.x; pm[5] = v.y; pm[9] = v.z; pm[13] = minusEye.dot(v);
-		pm[2] = n.x; pm[6] = n.y; pm[10] = n.z; pm[14] = minusEye.dot(n);
-		pm[3] = 0.0f; pm[7] = 0.0f; pm[11] = 0.0f; pm[15] = 1.0f;
-		
-		matrixBuffer.put(pm);
-		matrixBuffer.rewind();
-		Gdx.gl.glUniformMatrix4fv(viewMatrixPointer, 1, false, matrixBuffer);
+		return matrixBuffer;
 	}
-	
-	
 }

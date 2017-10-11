@@ -1,4 +1,4 @@
-package com.ru.tgra.shapes;
+package com.ru.tgra.graphics;
 
 import java.nio.FloatBuffer;
 import java.util.Stack;
@@ -162,6 +162,7 @@ public class Matrix {
 		matrix.put(15, tmp.get(15));
 	}
 
+	/*
 	public void setShaderMatrix(int shaderMatrixPointer)
 	{
 		this.shaderMatrixPointer = shaderMatrixPointer;
@@ -170,8 +171,11 @@ public class Matrix {
 
 	public void setShaderMatrix()
 	{
-		Gdx.gl.glUniformMatrix4fv(shaderMatrixPointer, 1, false, matrix);
+		
 	}
+	*/
 
-
+	public FloatBuffer getMatrix() {
+		return this.matrix;
+	}
 }
