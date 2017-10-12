@@ -37,6 +37,8 @@ public class Maze3D extends ApplicationAdapter implements InputProcessor {
 	private float fov = 90.0f;
 
 	//private ModelMatrix modelMatrix;
+	
+	public static Point3D topLeft = new Point3D();
 
 	/**
 	 * Set up all data necessary to render scene.
@@ -160,7 +162,7 @@ public class Maze3D extends ApplicationAdapter implements InputProcessor {
 		
 		input(deltaTime);
 		
-		Collisions.checkCollisions(cam.eye);
+		Collisions.checkCollisions(cam);
 	}
 	
 	/**
@@ -236,6 +238,14 @@ public class Maze3D extends ApplicationAdapter implements InputProcessor {
 			BoxGraphic.drawSolidCube();
 			ModelMatrix.main.popMatrix();
 			
+			ModelMatrix.main.pushMatrix();
+			shader.setMaterialDiffuse(Color.RED.r, Color.RED.g, Color.RED.b, 1.0f);
+			ModelMatrix.main.addTranslation(topLeft.x, topLeft.y, topLeft.z);
+			ModelMatrix.main.addScale(0.2f, 0.2f, 0.2f);
+			shader.setModelMatrix(ModelMatrix.main.getMatrix());
+			SphereGraphic.drawSolidSphere();
+			ModelMatrix.main.popMatrix();
+			
 			if (viewNum == 1) {
 				shader.setMaterialDiffuse(1.0f, 0.3f, 0.1f, 1.0f);
 				
@@ -296,6 +306,8 @@ public class Maze3D extends ApplicationAdapter implements InputProcessor {
 		//put the code inside the update and display methods, depending on the nature of the code
 		update();
 		display();
+		
+		//System.out.println("("+cam.eye.x+", "+cam.eye.y+", "+cam.eye.z+")");
 	}
 	
 	private Point3D getStartingLookAt() {
