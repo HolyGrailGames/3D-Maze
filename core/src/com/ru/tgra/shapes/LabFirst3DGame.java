@@ -32,6 +32,7 @@ public class LabFirst3DGame extends ApplicationAdapter implements InputProcessor
 	private static final float WALL_HEIGHT = 5.0f;
 	private static final float MOUSE_SENSITIVITY = 20.0f;
 	private static final float CAMERA_SPEED = 5.0f;
+	private static final float LIGHTS_OFFSET = 5.0f;
 	
 	private Point2D lastMousePos;
 	
@@ -201,15 +202,16 @@ public class LabFirst3DGame extends ApplicationAdapter implements InputProcessor
 
 			
 			// Draw 4 spheres representing our 4 light sources in the maze!
-			drawSphere((MAZE_WIDTH * WALL_THICKNESS) - (8 * WALL_THICKNESS), 10.0f, (MAZE_WIDTH * WALL_THICKNESS) - (8 * WALL_THICKNESS));
-			drawSphere((0.0f + (8 * WALL_THICKNESS)), 10.0f, (MAZE_WIDTH * WALL_THICKNESS) - (8 * WALL_THICKNESS));
-			drawSphere((MAZE_WIDTH * WALL_THICKNESS) - (8 * WALL_THICKNESS), 10.0f, (0.0f + (8 * WALL_THICKNESS)));
-			drawSphere((0.0f + (8 * WALL_THICKNESS)), 10.0f, (0.0f + (8 * WALL_THICKNESS)));
+			drawSphere((MAZE_WIDTH * WALL_THICKNESS) - (LIGHTS_OFFSET * WALL_THICKNESS), 10.0f, (MAZE_WIDTH * WALL_THICKNESS) - (LIGHTS_OFFSET * WALL_THICKNESS));
+			drawSphere((0.0f + (LIGHTS_OFFSET * WALL_THICKNESS)), 10.0f, (MAZE_WIDTH * WALL_THICKNESS) - (LIGHTS_OFFSET * WALL_THICKNESS));
+			drawSphere((MAZE_WIDTH * WALL_THICKNESS) - (LIGHTS_OFFSET * WALL_THICKNESS), 10.0f, (0.0f + (LIGHTS_OFFSET * WALL_THICKNESS)));
+			drawSphere((0.0f + (LIGHTS_OFFSET * WALL_THICKNESS)), 10.0f, (0.0f + (LIGHTS_OFFSET * WALL_THICKNESS)));
 			
-			setupLightSource((MAZE_WIDTH * WALL_THICKNESS) - (8 * WALL_THICKNESS), 10.0f, (MAZE_WIDTH * WALL_THICKNESS) - (8 * WALL_THICKNESS), 1);
-			setupLightSource((0.0f + (8 * WALL_THICKNESS)), 10.0f, (MAZE_WIDTH * WALL_THICKNESS) - (8 * WALL_THICKNESS), 1);
-			setupLightSource((MAZE_WIDTH * WALL_THICKNESS) - (8 * WALL_THICKNESS), 10.0f, (0.0f + (8 * WALL_THICKNESS)), 1);
-			setupLightSource((0.0f + (8 * WALL_THICKNESS)), 10.0f, (0.0f + (8 * WALL_THICKNESS)), 1);
+			// Place light sources on the same location
+			setupLightSource((MAZE_WIDTH * WALL_THICKNESS) - (LIGHTS_OFFSET * WALL_THICKNESS), 10.0f, (MAZE_WIDTH * WALL_THICKNESS) - (LIGHTS_OFFSET * WALL_THICKNESS), 1);
+			setupLightSource((0.0f + (LIGHTS_OFFSET * WALL_THICKNESS)), 10.0f, (MAZE_WIDTH * WALL_THICKNESS) - (LIGHTS_OFFSET * WALL_THICKNESS), 1);
+			setupLightSource((MAZE_WIDTH * WALL_THICKNESS) - (LIGHTS_OFFSET * WALL_THICKNESS), 10.0f, (0.0f + (LIGHTS_OFFSET * WALL_THICKNESS)), 1);
+			setupLightSource((0.0f + (LIGHTS_OFFSET * WALL_THICKNESS)), 10.0f, (0.0f + (LIGHTS_OFFSET * WALL_THICKNESS)), 1);
 			
 			shader.setMaterialShininess(20.0f);
 			shader.setMaterialSpecular(0.5f, 0.5f, 0.5f, 1.0f);
