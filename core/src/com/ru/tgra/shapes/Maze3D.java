@@ -26,6 +26,8 @@ public class Maze3D extends ApplicationAdapter implements InputProcessor {
 	private Camera cam;
 	private Camera orthoCam;
 	
+	private BobbingBlock bobbingBlock;
+	
 	public static Shader shader;
 	// Maze generating stuff
 	private MazeGenerator generator;
@@ -88,6 +90,7 @@ public class Maze3D extends ApplicationAdapter implements InputProcessor {
 		nodes = generator.getNodes();
 		walls = new ArrayList<>();
 		initalizeWalls();
+		bobbingBlock = new BobbingBlock(new Point3D(1 * Settings.WALL_THICKNESS, 1.0f, 2 * Settings.WALL_THICKNESS), new Vector3D(1.0f, 1.0f, 1.0f));
 		
 		cam = new Camera();
 		cam.look(new Point3D(Settings.WALL_THICKNESS, 1, Settings.WALL_THICKNESS), getStartingLookAt(), new Vector3D(0,1,0));
@@ -170,6 +173,7 @@ public class Maze3D extends ApplicationAdapter implements InputProcessor {
 	 */
 	private void display()
 	{
+		float deltaTime = Gdx.graphics.getDeltaTime();
 		//do all actual drawing and rendering here
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
 		
@@ -238,13 +242,9 @@ public class Maze3D extends ApplicationAdapter implements InputProcessor {
 			BoxGraphic.drawSolidCube();
 			ModelMatrix.main.popMatrix();
 			
-			ModelMatrix.main.pushMatrix();
-			shader.setMaterialDiffuse(Color.RED.r, Color.RED.g, Color.RED.b, 1.0f);
-			ModelMatrix.main.addTranslation(topLeft.x, topLeft.y, topLeft.z);
-			ModelMatrix.main.addScale(0.2f, 0.2f, 0.2f);
-			shader.setModelMatrix(ModelMatrix.main.getMatrix());
-			SphereGraphic.drawSolidSphere();
-			ModelMatrix.main.popMatrix();
+			// Draw a bobbing block at a corner of the maze.
+			bobbingBlock.update(deltaTime);
+			bobbingBlock.draw(Color.YELLOW, Color.YELLOW);
 			
 			if (viewNum == 1) {
 				shader.setMaterialDiffuse(1.0f, 0.3f, 0.1f, 1.0f);
@@ -280,7 +280,6 @@ public class Maze3D extends ApplicationAdapter implements InputProcessor {
 		// Make sure to remove emission before leaving this function
 		shader.setMaterialEmission(0f, 0f, 0f, 1.0f);
 		ModelMatrix.main.popMatrix();
-		
 	}
 	
 	/**

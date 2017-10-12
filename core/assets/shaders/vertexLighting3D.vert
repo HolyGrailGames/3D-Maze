@@ -10,28 +10,43 @@ uniform mat4 u_modelMatrix;
 uniform mat4 u_viewMatrix;
 uniform mat4 u_projectionMatrix;
 
+// The position of the camera
 uniform vec4 u_eyePosition;
 
 // Global lighting variables
 uniform vec4 u_globalAmbient;
 
 // Light specific variables
-// We omit ambient for each light as it simplifies the light model.
+// We omit ambient for each light as it simplifies the light model, and the ambient of multiple lights might wash out our global effects.
+
+// The positions of the 4 lights
 uniform vec4 u_light1Position;
 uniform vec4 u_light2Position;
 uniform vec4 u_light3Position;
 uniform vec4 u_light4Position;
 
+// The direction the lights are facing
 uniform vec4 u_light1Direction;
 uniform vec4 u_light2Direction;
 uniform vec4 u_light3Direction;
 uniform vec4 u_light4Direction;
 
+// The diffuse part of the lights. Diffuse reflection 
+// is the reflection of light or other waves or particles from 
+// a surface such that a ray incident on the surface is scattered at many 
+// angles rather than at just one angle as in the case of specular reflection. 
+// ... Many common materials exhibit a mixture of specular and diffuse reflection.
 uniform vec4 u_light1Diffuse;
 uniform vec4 u_light2Diffuse;
 uniform vec4 u_light3Diffuse;
 uniform vec4 u_light4Diffuse;
 
+// The specular part of the lights. 
+// Specular reflection, also known as regular reflection, 
+// is the mirror-like reflection of waves, such as light, 
+// from a surface. In this process, each incident ray is 
+// reflected, with the reflected ray having the same angle to 
+// the surface normal as the incident ray.
 uniform vec4 u_light1Specular;
 uniform vec4 u_light2Specular;
 uniform vec4 u_light3Specular;
@@ -55,25 +70,25 @@ void main()
 	
 	
 	
-	// Preparation for lighting 
+	// Preparation for lighting
+	// We only need to calculate v ones, as it does only 
+	// depend on the position of the camera and the vertex sent in to the shader
 	vec4 v = u_eyePosition - position; // Direction to the camera	
 	
-	// Duplicate the following stuff for adding more lights to the game!
+	// The following code is duplicated for each of our four lights
 	// LIGHT 1!!	
 	vec4 s = u_light1Position - position; // Direction to the light
-	vec4 h = s + v;
+	vec4 h = s + v; // The halfway vector between s and v
 	
-	float lambert = max(0.0, dot(normal, s) / (length(normal) * length(s)));
-	float phong = max(0.0, dot(normal, h) / (length(normal) * length(h)));
+	float lambert = max(0.0, dot(normal, s) / (length(normal) * length(s))); // Calculate lambert
+	float phong = max(0.0, dot(normal, h) / (length(normal) * length(h))); // Calculate phong
 	
-	vec4 diffuseColor = lambert * u_light1Diffuse * u_materialDiffuse; 
+	vec4 diffuseColor = lambert * u_light1Diffuse * u_materialDiffuse;  // 
 	vec4 specularColor = pow(phong, u_materialShininess) * u_light1Specular * u_materialSpecular; 
 	
-	
-	//float spotAttenuation = max(0.0, dot(-s, u_light1Direction) / (length(s) * length(u_light1Direction)));
-	
-	//vec4 light1CalcColor = spotAttenuation * (diffuseColor + specularColor)
-	vec4 light1CalcColor = (diffuseColor + specularColor);
+	// The actual color value of light1, depends upon the position of the player, the position of the light
+	// the diffuse of the light, the specular of the light, and the specular, diffuse and shininess of the material.
+	vec4 light1CalcColor = (diffuseColor + specularColor); 
 	
 	// LIGHT 2!!
 	s = u_light2Position - position; // Direction to the light
@@ -85,9 +100,6 @@ void main()
 	diffuseColor = lambert * u_light2Diffuse * u_materialDiffuse; 
 	specularColor = pow(phong, u_materialShininess) * u_light2Specular * u_materialSpecular; 
 	
-	//spotAttenuation = max(0.0, dot(-s, u_light2Direction) / (length(s) * length(u_light2Direction)));
-	
-	//vec4 light2CalcColor = spotAttenuation * (diffuseColor + specularColor);
 	vec4 light2CalcColor = (diffuseColor + specularColor);
 	
 	// LIGHT 3!!
@@ -100,9 +112,6 @@ void main()
 	diffuseColor = lambert * u_light3Diffuse * u_materialDiffuse; 
 	specularColor = pow(phong, u_materialShininess) * u_light3Specular * u_materialSpecular; 
 	
-	//spotAttenuation = max(0.0, dot(-s, u_light3Direction) / (length(s) * length(u_light3Direction)));
-	
-	//vec4 light3CalcColor = spotAttenuation * (diffuseColor + specularColor);
 	vec4 light3CalcColor = (diffuseColor + specularColor);
 	
 	// LIGHT 4!!
@@ -115,11 +124,9 @@ void main()
 	diffuseColor = lambert * u_light4Diffuse * u_materialDiffuse; 
 	specularColor = pow(phong, u_materialShininess) * u_light4Specular * u_materialSpecular; 
 	
-	//spotAttenuation = max(0.0, dot(-s, u_light4Direction) / (length(s) * length(u_light4Direction)));
-	
-	//vec4 light4CalcColor = spotAttenuation * (diffuseColor + specularColor);
 	vec4 light4CalcColor = (diffuseColor + specularColor);
 		
+	// The final color represented in the game, it is affected by the global ambient and the color value of each light, with respect to the players position
 	v_color = u_globalAmbient * u_materialDiffuse + u_materialEmission + light1CalcColor + light2CalcColor + light3CalcColor + light4CalcColor;
 	
 	// Pos
