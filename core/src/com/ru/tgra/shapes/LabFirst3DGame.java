@@ -5,6 +5,7 @@ import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.InputProcessor;
+import com.badlogic.gdx.Graphics.DisplayMode;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 
@@ -36,6 +37,9 @@ public class LabFirst3DGame extends ApplicationAdapter implements InputProcessor
 	 */
 	@Override
 	public void create () {
+	
+		DisplayMode disp = Gdx.graphics.getDesktopDisplayMode();
+		//Gdx.graphics.setDisplayMode(disp.width, disp.height, true);
 		
 		Gdx.input.setInputProcessor(this);
 		shader = new Shader();
@@ -132,6 +136,10 @@ public class LabFirst3DGame extends ApplicationAdapter implements InputProcessor
 		if(Gdx.input.isKeyPressed(Input.Keys.G)) {
 			fov += 30.0f * deltaTime;
 		}
+		if(Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) {
+			Gdx.graphics.setDisplayMode(500, 500, false);
+			Gdx.app.exit();
+		}
 	}
 	
 	/**
@@ -154,6 +162,9 @@ public class LabFirst3DGame extends ApplicationAdapter implements InputProcessor
 		//do all actual drawing and rendering here
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
 		
+		// Setting the global ambient factor, this should not really be changed unless we want to implement a sun
+		// With a day / night cycle, then we can gradually increase/decrease this value with deltaTime to simulate day and night.
+		shader.setGlobalAmbient(0.6f, 0.6f, 0.6f, 1.0f);
 		for (int viewNum = 0; viewNum < 2; viewNum++) {
 			if (viewNum == 0) {
 				Gdx.gl.glViewport(0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
@@ -177,16 +188,18 @@ public class LabFirst3DGame extends ApplicationAdapter implements InputProcessor
 			float c = (float)Math.cos(sunAngle * Math.PI / 180.0);
 			
 			shader.setLightPosition(12 + c * 10,  14.0f,  12 + s * 10,  1.0f);
-			shader.setLightDiffuse(0.0f,  1.0f,  1.0f,  1.0f);
-			shader.setLightSpecular(0.5f, 0.5f, 0.5f, 1.0f);
+			shader.setLightDiffuse(1.0f,  1.0f,  1.0f,  1.0f);
+			shader.setLightSpecular(1.0f, 1.0f, 1.0f, 1.0f);
 			shader.setMaterialShininess(20.0f);
 			shader.setMaterialSpecular(0.5f, 0.5f, 0.5f, 1.0f);
 			
 			
 			ModelMatrix.main.pushMatrix();
 			ModelMatrix.main.addTranslation(12 + c * 10,  14.0f,  12 + s * 10);
+			shader.setMaterialEmission(0.5f, 0.5f, 0.5f, 1.0f);
 			shader.setModelMatrix(ModelMatrix.main.getMatrix());
 			SphereGraphic.drawSolidSphere();
+			shader.setMaterialEmission(0f, 0f, 0f, 1.0f);
 			ModelMatrix.main.popMatrix();
 			
 			drawMaze();
