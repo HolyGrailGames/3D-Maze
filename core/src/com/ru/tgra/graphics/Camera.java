@@ -4,6 +4,7 @@ import java.nio.FloatBuffer;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.utils.BufferUtils;
+import com.ru.tgra.utilities.Utilities;
 
 public class Camera 
 {
@@ -13,6 +14,8 @@ public class Camera
 	Vector3D v;
 	Vector3D n;
 	
+	public Point3D north, east, south, west;
+	
 	boolean orthographic;
 	
 	float left;
@@ -21,6 +24,8 @@ public class Camera
 	float top;
 	float near;
 	float far;
+	
+	public float radius = 0.6f;
 	
 	private FloatBuffer matrixBuffer;
 	
@@ -40,10 +45,19 @@ public class Camera
 		this.top = 1;
 		this.near = -1;
 		this.far = 1;
+		
+		this.east = new Point3D(eye.x+radius, eye.y, eye.z);
+		this.south = new Point3D(eye.x, eye.y, eye.z+radius);
+		this.west = new Point3D(eye.x-radius, eye.y, eye.z);
+		this.north = new Point3D(eye.x, eye.y, eye.z-radius);
 	}
 	
 	public void look(Point3D eye, Point3D center, Vector3D up) {
 		this.eye.set(eye.x, eye.y, eye.z);
+		this.east.set(eye.x+radius, eye.y, eye.z);
+		this.south.set(eye.x, eye.y, eye.z+radius);
+		this.west.set(eye.x-radius, eye.y, eye.z);
+		this.north.set(eye.x, eye.y, eye.z-radius);
 		n = Vector3D.difference(eye,  center);
 		u = up.cross(n);
 		n.normalize();
@@ -53,12 +67,19 @@ public class Camera
 	
 	public void setEye(float x, float y, float z) {
 		eye.set(x, y, z);
+		this.east.set(eye.x+radius, eye.y, eye.z);
+		this.south.set(eye.x, eye.y, eye.z+radius);
+		this.west.set(eye.x-radius, eye.y, eye.z);
+		this.north.set(eye.x, eye.y, eye.z-radius);
 	}
 	
 	public void slide(float delU, float delV, float delN) {
-		eye.x += delU*u.x + delV*v.x + delN*n.x;
-		eye.y += delU*u.y + delV*v.y + delN*n.y;
-		eye.z += delU*u.z + delV*v.z + delN*n.z;
+		eye.translate(delU*u.x + delV*v.x + delN*n.x, delU*u.y + delV*v.y + delN*n.y, delU*u.z + delV*v.z + delN*n.z);
+		
+		north.translate(delU*u.x + delV*v.x + delN*n.x, delU*u.y + delV*v.y + delN*n.y, delU*u.z + delV*v.z + delN*n.z);
+		east.translate(delU*u.x + delV*v.x + delN*n.x, delU*u.y + delV*v.y + delN*n.y, delU*u.z + delV*v.z + delN*n.z);
+		south.translate(delU*u.x + delV*v.x + delN*n.x, delU*u.y + delV*v.y + delN*n.y, delU*u.z + delV*v.z + delN*n.z);
+		west.translate(delU*u.x + delV*v.x + delN*n.x, delU*u.y + delV*v.y + delN*n.y, delU*u.z + delV*v.z + delN*n.z);
 	}
 	
 	public void roll(float angle) {

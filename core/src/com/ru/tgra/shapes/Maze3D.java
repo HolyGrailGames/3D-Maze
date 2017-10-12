@@ -39,6 +39,8 @@ public class Maze3D extends ApplicationAdapter implements InputProcessor {
 	private float fov = 90.0f;
 
 	//private ModelMatrix modelMatrix;
+	
+	public static Point3D topLeft = new Point3D();
 
 	/**
 	 * Set up all data necessary to render scene.
@@ -88,7 +90,7 @@ public class Maze3D extends ApplicationAdapter implements InputProcessor {
 		nodes = generator.getNodes();
 		walls = new ArrayList<>();
 		initalizeWalls();
-		bobbingBlock = new BobbingBlock(new Point3D(23 * Settings.WALL_THICKNESS, 1.0f, 23 * Settings.WALL_THICKNESS), new Vector3D(1.0f, 1.0f, 1.0f));
+		bobbingBlock = new BobbingBlock(new Point3D(1 * Settings.WALL_THICKNESS, 1.0f, 2 * Settings.WALL_THICKNESS), new Vector3D(1.0f, 1.0f, 1.0f));
 		
 		cam = new Camera();
 		cam.look(new Point3D(Settings.WALL_THICKNESS, 1, Settings.WALL_THICKNESS), getStartingLookAt(), new Vector3D(0,1,0));
@@ -163,7 +165,7 @@ public class Maze3D extends ApplicationAdapter implements InputProcessor {
 		
 		input(deltaTime);
 		
-		Collisions.checkCollisions(cam.eye);
+		Collisions.checkCollisions(cam);
 	}
 	
 	/**
@@ -303,6 +305,8 @@ public class Maze3D extends ApplicationAdapter implements InputProcessor {
 		//put the code inside the update and display methods, depending on the nature of the code
 		update();
 		display();
+		
+		//System.out.println("("+cam.eye.x+", "+cam.eye.y+", "+cam.eye.z+")");
 	}
 	
 	private Point3D getStartingLookAt() {
