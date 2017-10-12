@@ -8,22 +8,24 @@ import com.ru.tgra.graphics.Vector3D;
 public class BobbingBlock
 {
 	private Point3D position;
-	private float originalY;
 	private Vector3D scale;
 	
-	private float speed = 4f;
-	private float floatStrength = 1.0f;
+	private float bobFactor;
+	private float bobSpeed = 2.5f;
+	
 	
 	public BobbingBlock(Point3D position, Vector3D scale) {
 		this.position = position;
 		this.scale = scale;
-		this.originalY = position.y;
+		bobFactor = 0.0f;
 	}
 	
 	public void update(float deltaTime) {
         System.out.println(this.position.y);
         
-        this.position.translate(position.x, originalY + ((float)Math.sin(deltaTime) * floatStrength), position.z);
+       
+        bobFactor += deltaTime * bobSpeed;
+        position.y += Math.sin(bobFactor) * bobSpeed * deltaTime;
 	}
 	
 	public void draw(Color diffuse, Color specular) {

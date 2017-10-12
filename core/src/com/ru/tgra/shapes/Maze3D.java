@@ -88,7 +88,7 @@ public class Maze3D extends ApplicationAdapter implements InputProcessor {
 		nodes = generator.getNodes();
 		walls = new ArrayList<>();
 		initalizeWalls();
-		bobbingBlock = new BobbingBlock(new Point3D(23 * WALL_THICKNESS, 5.0f, 23 * WALL_THICKNESS), new Vector3D(1.5f, 1.5f, 1.5f));
+		bobbingBlock = new BobbingBlock(new Point3D(23 * Settings.WALL_THICKNESS, 1.0f, 23 * Settings.WALL_THICKNESS), new Vector3D(1.0f, 1.0f, 1.0f));
 		
 		cam = new Camera();
 		cam.look(new Point3D(Settings.WALL_THICKNESS, 1, Settings.WALL_THICKNESS), getStartingLookAt(), new Vector3D(0,1,0));
@@ -242,7 +242,7 @@ public class Maze3D extends ApplicationAdapter implements InputProcessor {
 			
 			// Draw a bobbing block at a corner of the maze.
 			bobbingBlock.update(deltaTime);
-			bobbingBlock.draw(Color.CYAN, Color.MAGENTA);
+			bobbingBlock.draw(Color.YELLOW, Color.YELLOW);
 			
 			if (viewNum == 1) {
 				shader.setMaterialDiffuse(1.0f, 0.3f, 0.1f, 1.0f);
