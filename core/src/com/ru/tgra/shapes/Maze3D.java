@@ -11,13 +11,14 @@ import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.Graphics.DisplayMode;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
-
+import com.ru.tgra.collisions.Collisions;
 import com.ru.tgra.graphics.Camera;
 import com.ru.tgra.graphics.ModelMatrix;
 import com.ru.tgra.graphics.Point2D;
 import com.ru.tgra.graphics.Point3D;
 import com.ru.tgra.graphics.Shader;
 import com.ru.tgra.graphics.Vector3D;
+import com.ru.tgra.utilities.Settings;
 
 public class Maze3D extends ApplicationAdapter implements InputProcessor {
 	
@@ -28,15 +29,8 @@ public class Maze3D extends ApplicationAdapter implements InputProcessor {
 	public static Shader shader;
 	// Maze generating stuff
 	private MazeGenerator generator;
-	private Node[] nodes;
+	public static Node[] nodes;
 	private List<Wall> walls;
-	private static final int MAZE_WIDTH = 25;
-	private static final int MAZE_HEIGHT = 25 ;
-	private static final float WALL_THICKNESS = 3.0f;
-	private static final float WALL_HEIGHT = 5.0f;
-	private static final float MOUSE_SENSITIVITY = 20.0f;
-	private static final float CAMERA_SPEED = 5.0f;
-	private static final float LIGHTS_OFFSET = 5.0f;
 	
 	private Point2D lastMousePos = null;
 	
@@ -86,7 +80,7 @@ public class Maze3D extends ApplicationAdapter implements InputProcessor {
 		Gdx.gl.glEnable(GL20.GL_DEPTH_TEST);
 		
 		// Initialize a new maze;
-		generator = new MazeGenerator(MAZE_WIDTH, MAZE_HEIGHT);
+		generator = new MazeGenerator(Settings.MAZE_WIDTH, Settings.MAZE_HEIGHT);
 		generator.init();
 		generator.generate();
 		nodes = generator.getNodes();
@@ -94,7 +88,7 @@ public class Maze3D extends ApplicationAdapter implements InputProcessor {
 		initalizeWalls();
 		
 		cam = new Camera();
-		cam.look(new Point3D(WALL_THICKNESS, 1, WALL_THICKNESS), getStartingLookAt(), new Vector3D(0,1,0));
+		cam.look(new Point3D(Settings.WALL_THICKNESS, 1, Settings.WALL_THICKNESS), getStartingLookAt(), new Vector3D(0,1,0));
 		
 		orthoCam = new Camera();
 		orthoCam.orthographicProjection(-10, 10, -10, 10, 3.0f, 100);
@@ -119,28 +113,28 @@ public class Maze3D extends ApplicationAdapter implements InputProcessor {
 			cam.pitch(-90.0f * deltaTime);
 		}
 		if(Gdx.input.isKeyPressed(Input.Keys.A)) {
-			cam.slide(-CAMERA_SPEED * deltaTime,  0,  0);
+			cam.slide(-Settings.CAMERA_SPEED * deltaTime,  0,  0);
 		}
 		if(Gdx.input.isKeyPressed(Input.Keys.D)) {
-			cam.slide(CAMERA_SPEED * deltaTime,  0, 0);
+			cam.slide(Settings.CAMERA_SPEED * deltaTime,  0, 0);
 		}
 		if(Gdx.input.isKeyPressed(Input.Keys.W)) {
-			cam.slide(0, 0, -CAMERA_SPEED * deltaTime);
+			cam.slide(0, 0, -Settings.CAMERA_SPEED * deltaTime);
 		}
 		if(Gdx.input.isKeyPressed(Input.Keys.S)) {
-			cam.slide(0, 0, CAMERA_SPEED * deltaTime);
+			cam.slide(0, 0, Settings.CAMERA_SPEED * deltaTime);
 		}
 		if(Gdx.input.isKeyPressed(Input.Keys.R)) {
-			cam.slide(0, CAMERA_SPEED * deltaTime, 0);
+			cam.slide(0, Settings.CAMERA_SPEED * deltaTime, 0);
 		}
 		if(Gdx.input.isKeyPressed(Input.Keys.F)) {
-			cam.slide(0, -CAMERA_SPEED * deltaTime, 0);
+			cam.slide(0, -Settings.CAMERA_SPEED * deltaTime, 0);
 		}
 		if(Gdx.input.isKeyPressed(Input.Keys.Q)) {
-			cam.roll(-MOUSE_SENSITIVITY * deltaTime);
+			cam.roll(-Settings.MOUSE_SENSITIVITY * deltaTime);
 		}
 		if(Gdx.input.isKeyPressed(Input.Keys.E)) {
-			cam.roll(MOUSE_SENSITIVITY * deltaTime);
+			cam.roll(Settings.MOUSE_SENSITIVITY * deltaTime);
 		}
 		
 		if(Gdx.input.isKeyPressed(Input.Keys.T)) {
@@ -165,6 +159,8 @@ public class Maze3D extends ApplicationAdapter implements InputProcessor {
 		sunAngle += 90.0f * deltaTime;
 		
 		input(deltaTime);
+		
+		Collisions.checkCollisions(cam.eye);
 	}
 	
 	/**
@@ -203,16 +199,24 @@ public class Maze3D extends ApplicationAdapter implements InputProcessor {
 			
 			// Setting up the light for the maze
 			// Draw 4 spheres representing our 4 light sources in the maze!
-			drawSphere((MAZE_WIDTH * WALL_THICKNESS) - (LIGHTS_OFFSET * WALL_THICKNESS), 10.0f, (MAZE_WIDTH * WALL_THICKNESS) - (LIGHTS_OFFSET * WALL_THICKNESS));
-			drawSphere((0.0f + (LIGHTS_OFFSET * WALL_THICKNESS)), 10.0f, (MAZE_WIDTH * WALL_THICKNESS) - (LIGHTS_OFFSET * WALL_THICKNESS));
-			drawSphere((MAZE_WIDTH * WALL_THICKNESS) - (LIGHTS_OFFSET * WALL_THICKNESS), 10.0f, (0.0f + (LIGHTS_OFFSET * WALL_THICKNESS)));
-			drawSphere((0.0f + (LIGHTS_OFFSET * WALL_THICKNESS)), 10.0f, (0.0f + (LIGHTS_OFFSET * WALL_THICKNESS)));
+			drawSphere((Settings.MAZE_WIDTH * Settings.WALL_THICKNESS) - (Settings.LIGHTS_OFFSET * Settings.WALL_THICKNESS), 
+					10.0f, (Settings.MAZE_WIDTH * Settings.WALL_THICKNESS) - (Settings.LIGHTS_OFFSET * Settings.WALL_THICKNESS));
+			drawSphere((0.0f + (Settings.LIGHTS_OFFSET * Settings.WALL_THICKNESS)), 
+					10.0f, (Settings.MAZE_WIDTH * Settings.WALL_THICKNESS) - (Settings.LIGHTS_OFFSET * Settings.WALL_THICKNESS));
+			drawSphere((Settings.MAZE_WIDTH * Settings.WALL_THICKNESS) - (Settings.LIGHTS_OFFSET * Settings.WALL_THICKNESS), 
+					10.0f, (0.0f + (Settings.LIGHTS_OFFSET * Settings.WALL_THICKNESS)));
+			drawSphere((0.0f + (Settings.LIGHTS_OFFSET * Settings.WALL_THICKNESS)), 
+					10.0f, (0.0f + (Settings.LIGHTS_OFFSET * Settings.WALL_THICKNESS)));
 			
 			// Place light sources on the same location
-			setupLightSource((MAZE_WIDTH * WALL_THICKNESS) - (LIGHTS_OFFSET * WALL_THICKNESS), 10.0f, (MAZE_WIDTH * WALL_THICKNESS) - (LIGHTS_OFFSET * WALL_THICKNESS), 1);
-			setupLightSource((0.0f + (LIGHTS_OFFSET * WALL_THICKNESS)), 10.0f, (MAZE_WIDTH * WALL_THICKNESS) - (LIGHTS_OFFSET * WALL_THICKNESS), 1);
-			setupLightSource((MAZE_WIDTH * WALL_THICKNESS) - (LIGHTS_OFFSET * WALL_THICKNESS), 10.0f, (0.0f + (LIGHTS_OFFSET * WALL_THICKNESS)), 1);
-			setupLightSource((0.0f + (LIGHTS_OFFSET * WALL_THICKNESS)), 10.0f, (0.0f + (LIGHTS_OFFSET * WALL_THICKNESS)), 1);
+			setupLightSource((Settings.MAZE_WIDTH * Settings.WALL_THICKNESS) - (Settings.LIGHTS_OFFSET * Settings.WALL_THICKNESS), 
+					10.0f, (Settings.MAZE_WIDTH * Settings.WALL_THICKNESS) - (Settings.LIGHTS_OFFSET * Settings.WALL_THICKNESS), 1);
+			setupLightSource((0.0f + (Settings.LIGHTS_OFFSET * Settings.WALL_THICKNESS)), 
+					10.0f, (Settings.MAZE_WIDTH * Settings.WALL_THICKNESS) - (Settings.LIGHTS_OFFSET * Settings.WALL_THICKNESS), 1);
+			setupLightSource((Settings.MAZE_WIDTH * Settings.WALL_THICKNESS) - (Settings.LIGHTS_OFFSET * Settings.WALL_THICKNESS), 
+					10.0f, (0.0f + (Settings.LIGHTS_OFFSET * Settings.WALL_THICKNESS)), 1);
+			setupLightSource((0.0f + (Settings.LIGHTS_OFFSET * Settings.WALL_THICKNESS)), 
+					10.0f, (0.0f + (Settings.LIGHTS_OFFSET * Settings.WALL_THICKNESS)), 1);
 			
 			// Draw all the walls of the maze.
 			// NOTE: Not all elements of the array have walls in them, some parts are empty.
@@ -226,8 +230,8 @@ public class Maze3D extends ApplicationAdapter implements InputProcessor {
 			// Draw the floor of the maze.
 			ModelMatrix.main.pushMatrix();
 			shader.setMaterialDiffuse(Color.LIGHT_GRAY.r, Color.LIGHT_GRAY.g, Color.LIGHT_GRAY.r, 1.0f);
-			ModelMatrix.main.addTranslation((MAZE_WIDTH*3)/2, -0.5f, (MAZE_HEIGHT*3)/2);
-			ModelMatrix.main.addScale(MAZE_WIDTH*3, 1.0f, MAZE_HEIGHT*3);
+			ModelMatrix.main.addTranslation((Settings.MAZE_WIDTH*3)/2, -0.5f, (Settings.MAZE_HEIGHT*3)/2);
+			ModelMatrix.main.addScale(Settings.MAZE_WIDTH*3, 1.0f, Settings.MAZE_HEIGHT*3);
 			shader.setModelMatrix(ModelMatrix.main.getMatrix());
 			BoxGraphic.drawSolidCube();
 			ModelMatrix.main.popMatrix();
@@ -273,10 +277,11 @@ public class Maze3D extends ApplicationAdapter implements InputProcessor {
 	 * Draw the maze generated by the mazegenerator
 	 */
 	public void initalizeWalls() {
-		for (int i = 0; i < MAZE_WIDTH; i++) {
-			for (int j = 0; j < MAZE_HEIGHT; j++) {
-				if (nodes[j + i * MAZE_WIDTH].c == '#') {
-					walls.add(new Wall(new Point3D(i * WALL_THICKNESS, 1, j * WALL_THICKNESS), new Vector3D(WALL_THICKNESS, WALL_HEIGHT, WALL_THICKNESS))); 
+		for (int i = 0; i < Settings.MAZE_WIDTH; i++) {
+			for (int j = 0; j < Settings.MAZE_HEIGHT; j++) {
+				if (nodes[j + i * Settings.MAZE_WIDTH].c == '#') {
+					walls.add(new Wall(new Point3D(i * Settings.WALL_THICKNESS, 1, j * Settings.WALL_THICKNESS), 
+							new Vector3D(Settings.WALL_THICKNESS, Settings.WALL_HEIGHT, Settings.WALL_THICKNESS))); 
 				}
 			}
 		}
@@ -294,12 +299,10 @@ public class Maze3D extends ApplicationAdapter implements InputProcessor {
 	}
 	
 	private Point3D getStartingLookAt() {
-		if (nodes[1 + 2 * MAZE_WIDTH].c == ' ') {
-			System.out.println("first");
-			return new Point3D(2*WALL_THICKNESS, 1, WALL_THICKNESS);
+		if (nodes[1 + 2 * Settings.MAZE_WIDTH].c == ' ') {
+			return new Point3D(2*Settings.WALL_THICKNESS, 1, Settings.WALL_THICKNESS);
 		}
-		System.out.println("second");
-		return new Point3D(WALL_THICKNESS, 1, 2*WALL_THICKNESS);
+		return new Point3D(Settings.WALL_THICKNESS, 1, 2*Settings.WALL_THICKNESS);
 	}
 
 	@Override
@@ -354,10 +357,10 @@ public class Maze3D extends ApplicationAdapter implements InputProcessor {
 		lastMousePos = currMousePos;
 		
 		if(deltaMouse.x < 0) {
-			cam.yaw(MOUSE_SENSITIVITY * deltaTime * Math.abs(deltaMouse.x));
+			cam.yaw(Settings.MOUSE_SENSITIVITY * deltaTime * Math.abs(deltaMouse.x));
 		}
 		if(deltaMouse.x > 0) {
-			cam.yaw(-MOUSE_SENSITIVITY * deltaTime * Math.abs(deltaMouse.x));
+			cam.yaw(-Settings.MOUSE_SENSITIVITY * deltaTime * Math.abs(deltaMouse.x));
 		}
 		/*
 		if(deltaMouse.y < 0) {
