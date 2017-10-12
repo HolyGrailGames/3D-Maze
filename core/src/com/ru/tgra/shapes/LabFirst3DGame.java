@@ -25,7 +25,7 @@ public class LabFirst3DGame extends ApplicationAdapter implements InputProcessor
 	private MazeGenerator generator;
 	private Node[] nodes;
 	private static final int MAZE_WIDTH = 25;
-	private static final int MAZE_HEIGHT = 25;
+	private static final int MAZE_HEIGHT = 25 ;
 	
 	private float fov = 90.0f;
 
@@ -160,14 +160,15 @@ public class LabFirst3DGame extends ApplicationAdapter implements InputProcessor
 				cam.perspectiveProjection(fov, 1.0f, 0.4f, 100.0f);
 				shader.setViewMatrix(cam.getViewMatrix());
 				shader.setProjectionMatrix(cam.getProjectionMatrix());
+				shader.setEyePosition(cam.eye.x, cam.eye.y, cam.eye.z, 1.0f);
 			}
 			else {
 				Gdx.gl.glClear(GL20.GL_DEPTH_BUFFER_BIT);
 				Gdx.gl.glViewport(Gdx.graphics.getWidth() / 4 * 3, Gdx.graphics.getHeight()/4 * 3, Gdx.graphics.getWidth() / 4, Gdx.graphics.getHeight()/4);
 				orthoCam.look(new Point3D(cam.eye.x, 20.0f, cam.eye.z), cam.eye, new Vector3D(0,0,-1));
-				//orthoCam.look(new Point3D(7.0f, 40.0f, -7.0f), new Point3D(7.0f, 0.0f, -7.0f), new Vector3D(0, 0, -1));
 				shader.setViewMatrix(orthoCam.getViewMatrix());
 				shader.setProjectionMatrix(orthoCam.getProjectionMatrix());
+				shader.setEyePosition(orthoCam.eye.x, orthoCam.eye.y, orthoCam.eye.z, 1.0f);
 			}
 			
 			ModelMatrix.main.loadIdentityMatrix();
@@ -175,11 +176,15 @@ public class LabFirst3DGame extends ApplicationAdapter implements InputProcessor
 			float s = (float)Math.sin(sunAngle * Math.PI / 180.0);
 			float c = (float)Math.cos(sunAngle * Math.PI / 180.0);
 			
-			shader.setLightPosition(12 + c * 10,  4.0f,  12 + s * 10,  1.0f);
+			shader.setLightPosition(12 + c * 10,  14.0f,  12 + s * 10,  1.0f);
 			shader.setLightDiffuse(0.0f,  1.0f,  1.0f,  1.0f);
+			shader.setLightSpecular(0.5f, 0.5f, 0.5f, 1.0f);
+			shader.setMaterialShininess(20.0f);
+			shader.setMaterialSpecular(0.5f, 0.5f, 0.5f, 1.0f);
+			
 			
 			ModelMatrix.main.pushMatrix();
-			ModelMatrix.main.addTranslation(12 + c * 10,  4.0f,  12 + s * 10);
+			ModelMatrix.main.addTranslation(12 + c * 10,  14.0f,  12 + s * 10);
 			shader.setModelMatrix(ModelMatrix.main.getMatrix());
 			SphereGraphic.drawSolidSphere();
 			ModelMatrix.main.popMatrix();

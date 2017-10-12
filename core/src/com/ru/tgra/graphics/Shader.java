@@ -17,11 +17,16 @@ public class Shader
 	private int modelMatrixLoc;
 	private int viewMatrixLoc;
 	private int projectionMatrixLoc;
+	
+	private int eyePosLoc;
 
 	private int lightPosLoc;
 	private int lightDifLoc;
 	private int matDifLoc;
-
+	private int matShineLoc;
+	private int lightSpecLoc;
+	private int matSpecLoc;
+	
 	public Shader() {
 		String vertexShaderString;
 		String fragmentShaderString;
@@ -57,10 +62,14 @@ public class Shader
 		projectionMatrixLoc	= Gdx.gl.glGetUniformLocation(renderingProgramID, "u_projectionMatrix");
 
 
-//		colorLoc				= Gdx.gl.glGetUniformLocation(renderingProgramID, "u_color");
+		eyePosLoc 				= Gdx.gl.glGetUniformLocation(renderingProgramID, "u_eyePosition");
+		
 		lightPosLoc				= Gdx.gl.glGetUniformLocation(renderingProgramID, "u_lightPosition");
 		lightDifLoc				= Gdx.gl.glGetUniformLocation(renderingProgramID, "u_lightDiffuse");
+		lightSpecLoc				= Gdx.gl.glGetUniformLocation(renderingProgramID, "u_lightSpecular");
 		matDifLoc				= Gdx.gl.glGetUniformLocation(renderingProgramID, "u_materialDiffuse");
+		matShineLoc				= Gdx.gl.glGetUniformLocation(renderingProgramID, "u_materialShininess");
+		matSpecLoc				= Gdx.gl.glGetUniformLocation(renderingProgramID, "u_materialSpecular");
 		
 		
 		Gdx.gl.glUseProgram(renderingProgramID);
@@ -76,13 +85,33 @@ public class Shader
 		Gdx.gl.glUniform4f(lightPosLoc, x, y, z, w);
 	}
 	
+
+	public void setEyePosition(float x, float y, float z, float w) {
+		Gdx.gl.glUniform4f(eyePosLoc, x, y, z, w);
+	}
+	
 	public void setLightDiffuse(float r, float g, float b, float a) {
 		Gdx.gl.glUniform4f(lightDifLoc, r, g, b, a);
 	}
 	
+	public void setLightSpecular(float r, float g, float b, float a) {
+		Gdx.gl.glUniform4f(lightSpecLoc, r, g, b, a);
+	}
+	
+	
 	public void setMaterialDiffuse(float r, float g, float b, float a) {
 		Gdx.gl.glUniform4f(matDifLoc, r, g, b, a);
 	}
+	
+	public void setMaterialSpecular(float r, float g, float b, float a) {
+		Gdx.gl.glUniform4f(matSpecLoc, r, g, b, a);
+	}
+	
+
+	public void setMaterialShininess(float shine) {
+		Gdx.gl.glUniform1f(matShineLoc, shine);
+	}
+	
 	
 	public int getVertexPointer() {
 		return this.positionLoc;
