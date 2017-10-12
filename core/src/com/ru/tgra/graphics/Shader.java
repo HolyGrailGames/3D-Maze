@@ -20,19 +20,21 @@ public class Shader
 	
 	private int eyePosLoc;
 
+	private int globalAmbLoc;
 	private int lightPosLoc;
 	private int lightDifLoc;
 	private int matDifLoc;
 	private int matShineLoc;
 	private int lightSpecLoc;
 	private int matSpecLoc;
+	private int matEmissionLoc;
 	
 	public Shader() {
 		String vertexShaderString;
 		String fragmentShaderString;
 
-		vertexShaderString = Gdx.files.internal("shaders/simple3D.vert").readString();
-		fragmentShaderString =  Gdx.files.internal("shaders/simple3D.frag").readString();
+		vertexShaderString = Gdx.files.internal("shaders/vertexLighting3D.vert").readString();
+		fragmentShaderString =  Gdx.files.internal("shaders/vertexLighting3D.frag").readString();
 
 		vertexShaderID = Gdx.gl.glCreateShader(GL20.GL_VERTEX_SHADER);
 		fragmentShaderID = Gdx.gl.glCreateShader(GL20.GL_FRAGMENT_SHADER);
@@ -70,6 +72,8 @@ public class Shader
 		matDifLoc				= Gdx.gl.glGetUniformLocation(renderingProgramID, "u_materialDiffuse");
 		matShineLoc				= Gdx.gl.glGetUniformLocation(renderingProgramID, "u_materialShininess");
 		matSpecLoc				= Gdx.gl.glGetUniformLocation(renderingProgramID, "u_materialSpecular");
+		matEmissionLoc 			= Gdx.gl.glGetUniformLocation(renderingProgramID, "u_materialEmission");
+		globalAmbLoc			= Gdx.gl.glGetUniformLocation(renderingProgramID, "u_globalAmbient");
 		
 		
 		Gdx.gl.glUseProgram(renderingProgramID);
@@ -89,6 +93,11 @@ public class Shader
 	public void setEyePosition(float x, float y, float z, float w) {
 		Gdx.gl.glUniform4f(eyePosLoc, x, y, z, w);
 	}
+
+	public void setGlobalAmbient(float r, float g, float b, float a) {
+		Gdx.gl.glUniform4f(globalAmbLoc, r, g, b, a);
+	}
+	
 	
 	public void setLightDiffuse(float r, float g, float b, float a) {
 		Gdx.gl.glUniform4f(lightDifLoc, r, g, b, a);
@@ -101,6 +110,11 @@ public class Shader
 	
 	public void setMaterialDiffuse(float r, float g, float b, float a) {
 		Gdx.gl.glUniform4f(matDifLoc, r, g, b, a);
+	}
+	
+
+	public void setMaterialEmission(float r, float g, float b, float a) {
+		Gdx.gl.glUniform4f(matEmissionLoc, r, g, b, a);
 	}
 	
 	public void setMaterialSpecular(float r, float g, float b, float a) {
