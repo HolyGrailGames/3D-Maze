@@ -278,7 +278,6 @@ public class Maze3D extends ApplicationAdapter implements InputProcessor {
 		// Make sure to remove emission before leaving this function
 		shader.setMaterialEmission(0f, 0f, 0f, 1.0f);
 		ModelMatrix.main.popMatrix();
-		
 	}
 	
 	/**

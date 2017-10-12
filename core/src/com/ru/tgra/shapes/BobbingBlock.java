@@ -21,9 +21,6 @@ public class BobbingBlock
 	}
 	
 	public void update(float deltaTime) {
-        System.out.println(this.position.y);
-        
-       
         bobFactor += deltaTime * bobSpeed;
         position.y += Math.sin(bobFactor) * bobSpeed * deltaTime;
 	}
