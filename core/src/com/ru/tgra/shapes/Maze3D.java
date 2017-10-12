@@ -38,7 +38,7 @@ public class Maze3D extends ApplicationAdapter implements InputProcessor {
 	private static final float CAMERA_SPEED = 5.0f;
 	private static final float LIGHTS_OFFSET = 5.0f;
 	
-	private Point2D lastMousePos;
+	private Point2D lastMousePos = null;
 	
 	private float fov = 90.0f;
 
@@ -98,9 +98,6 @@ public class Maze3D extends ApplicationAdapter implements InputProcessor {
 		
 		orthoCam = new Camera();
 		orthoCam.orthographicProjection(-10, 10, -10, 10, 3.0f, 100);
-		
-		// Set the starting position of the mouse
-		lastMousePos = new Point2D(0, Gdx.graphics.getHeight());
 	}
 	
 	/**
@@ -345,6 +342,11 @@ public class Maze3D extends ApplicationAdapter implements InputProcessor {
 	public boolean mouseMoved(int screenX, int screenY) {
 		// TODO Auto-generated method stub
 		
+		if (lastMousePos == null) {
+			lastMousePos = new Point2D(screenX, screenY);
+			return false;
+		}
+		
 		float deltaTime = Gdx.graphics.getDeltaTime();
 		Point2D currMousePos = new Point2D(screenX, screenY);
 		
@@ -357,12 +359,14 @@ public class Maze3D extends ApplicationAdapter implements InputProcessor {
 		if(deltaMouse.x > 0) {
 			cam.yaw(-MOUSE_SENSITIVITY * deltaTime * Math.abs(deltaMouse.x));
 		}
+		/*
 		if(deltaMouse.y < 0) {
 			cam.pitch(MOUSE_SENSITIVITY * deltaTime * Math.abs(deltaMouse.y));
 		}
 		if(deltaMouse.y > 0) {
 			cam.pitch(-MOUSE_SENSITIVITY * deltaTime * Math.abs(deltaMouse.y));
 		}
+		*/
 		
 		return false;
 	}
