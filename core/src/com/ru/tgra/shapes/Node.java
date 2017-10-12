@@ -2,10 +2,10 @@ package com.ru.tgra.shapes;
 
 public class Node {
 
-	int x, y; //Node position - little waste of memory, but it allows faster generation
-	Node parent; //Pointer to parent node
-	char c; //Character to be displayed
-	char dirs; //Directions that still haven't been explored
+	public int x, y; //Node position - little waste of memory, but it allows faster generation
+	public Node parent; //Pointer to parent node
+	public char c; //Character to be displayed
+	public char dirs; //Directions that still haven't been explored
 	
 	public Node(int x, int y, Node parent, char c, char dirs) {
 		this.x = x;
