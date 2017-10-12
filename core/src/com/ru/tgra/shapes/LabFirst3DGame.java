@@ -173,7 +173,7 @@ public class LabFirst3DGame extends ApplicationAdapter implements InputProcessor
 		
 		// Setting the global ambient factor, this should not really be changed unless we want to implement a sun
 		// With a day / night cycle, then we can gradually increase/decrease this value with deltaTime to simulate day and night.
-		shader.setGlobalAmbient(0.6f, 0.6f, 0.6f, 1.0f);
+		shader.setGlobalAmbient(0.2f, 0.2f, 0.2f, 1.0f);
 		for (int viewNum = 0; viewNum < 2; viewNum++) {
 			if (viewNum == 0) {
 				Gdx.gl.glViewport(0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
@@ -193,23 +193,26 @@ public class LabFirst3DGame extends ApplicationAdapter implements InputProcessor
 			
 			ModelMatrix.main.loadIdentityMatrix();
 			
-			float s = (float)Math.sin(sunAngle * Math.PI / 180.0);
-			float c = (float)Math.cos(sunAngle * Math.PI / 180.0);
+			// Can use this shit to rotate stuff
+			//float s = (float)Math.sin(sunAngle * Math.PI / 180.0);
+			//float c = (float)Math.cos(sunAngle * Math.PI / 180.0);
 			
-			shader.setLightPosition(12 + 10,  14.0f,  12 + 10,  1.0f);
-			shader.setLightDiffuse(1.0f,  1.0f,  1.0f,  1.0f);
-			shader.setLightSpecular(1.0f, 1.0f, 1.0f, 1.0f);
+			// Setting up the light for the maze
+
+			
+			// Draw 4 spheres representing our 4 light sources in the maze!
+			drawSphere((MAZE_WIDTH * WALL_THICKNESS) - (8 * WALL_THICKNESS), 10.0f, (MAZE_WIDTH * WALL_THICKNESS) - (8 * WALL_THICKNESS));
+			drawSphere((0.0f + (8 * WALL_THICKNESS)), 10.0f, (MAZE_WIDTH * WALL_THICKNESS) - (8 * WALL_THICKNESS));
+			drawSphere((MAZE_WIDTH * WALL_THICKNESS) - (8 * WALL_THICKNESS), 10.0f, (0.0f + (8 * WALL_THICKNESS)));
+			drawSphere((0.0f + (8 * WALL_THICKNESS)), 10.0f, (0.0f + (8 * WALL_THICKNESS)));
+			
+			setupLightSource((MAZE_WIDTH * WALL_THICKNESS) - (8 * WALL_THICKNESS), 10.0f, (MAZE_WIDTH * WALL_THICKNESS) - (8 * WALL_THICKNESS), 1);
+			setupLightSource((0.0f + (8 * WALL_THICKNESS)), 10.0f, (MAZE_WIDTH * WALL_THICKNESS) - (8 * WALL_THICKNESS), 1);
+			setupLightSource((MAZE_WIDTH * WALL_THICKNESS) - (8 * WALL_THICKNESS), 10.0f, (0.0f + (8 * WALL_THICKNESS)), 1);
+			setupLightSource((0.0f + (8 * WALL_THICKNESS)), 10.0f, (0.0f + (8 * WALL_THICKNESS)), 1);
+			
 			shader.setMaterialShininess(20.0f);
 			shader.setMaterialSpecular(0.5f, 0.5f, 0.5f, 1.0f);
-			
-			
-			ModelMatrix.main.pushMatrix();
-			ModelMatrix.main.addTranslation(12 + c * 10,  14.0f,  12 + s * 10);
-			shader.setMaterialEmission(0.5f, 0.5f, 0.5f, 1.0f);
-			shader.setModelMatrix(ModelMatrix.main.getMatrix());
-			SphereGraphic.drawSolidSphere();
-			shader.setMaterialEmission(0f, 0f, 0f, 1.0f);
-			ModelMatrix.main.popMatrix();
 			
 			drawMaze();
 			
@@ -232,6 +235,30 @@ public class LabFirst3DGame extends ApplicationAdapter implements InputProcessor
 				ModelMatrix.main.popMatrix();
 			}
 		}
+	}
+	
+	public void setupLightSource(float x, float y, float z, int lightIndex) {
+		// set the position to equal the position we send in
+		shader.setLightPosition(x, y, z, 1.0f, lightIndex);
+		// Set the lights to point straight down from where its placed
+		shader.setLightDirection(x, 0f, z, 1.0f, lightIndex);
+		// Play with these parameters for effects
+		shader.setLightDiffuse(1.0f,  1.0f,  1.0f,  1.0f, lightIndex);
+		shader.setLightSpecular(1.0f, 1.0f, 1.0f, 1.0f, lightIndex);
+	}
+	
+	public void drawSphere(float x, float y, float z) {
+		// Drawing a sphere where the light is (is it a sun? no! is it a plane? no! its just a sphere!)
+		ModelMatrix.main.pushMatrix();
+		ModelMatrix.main.addTranslation(x, y, z);
+		// Make the sphere emissive
+		shader.setMaterialEmission(0.5f, 0.5f, 0.5f, 1.0f);
+		shader.setModelMatrix(ModelMatrix.main.getMatrix());
+		SphereGraphic.drawSolidSphere();
+		// Make sure to remove emission before leaving this function
+		shader.setMaterialEmission(0f, 0f, 0f, 1.0f);
+		ModelMatrix.main.popMatrix();
+		
 	}
 	
 	/**
