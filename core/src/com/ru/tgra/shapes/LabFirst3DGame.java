@@ -10,6 +10,7 @@ import com.badlogic.gdx.graphics.GL20;
 
 import com.ru.tgra.graphics.Camera;
 import com.ru.tgra.graphics.ModelMatrix;
+import com.ru.tgra.graphics.Point2D;
 import com.ru.tgra.graphics.Point3D;
 import com.ru.tgra.graphics.Shader;
 import com.ru.tgra.graphics.Vector3D;
@@ -26,6 +27,12 @@ public class LabFirst3DGame extends ApplicationAdapter implements InputProcessor
 	private Node[] nodes;
 	private static final int MAZE_WIDTH = 25;
 	private static final int MAZE_HEIGHT = 25 ;
+	private static final float WALL_THICKNESS = 3.0f;
+	private static final float WALL_HEIGHT = 5.0f;
+	private static final float MOUSE_SENSITIVITY = 20.0f;
+	private static final float CAMERA_SPEED = 5.0f;
+	
+	private Point2D lastMousePos;
 	
 	private float fov = 90.0f;
 
@@ -38,6 +45,7 @@ public class LabFirst3DGame extends ApplicationAdapter implements InputProcessor
 	public void create () {
 		
 		Gdx.input.setInputProcessor(this);
+		Gdx.input.setCursorCatched(true);
 		shader = new Shader();
 		
 /*
@@ -67,20 +75,21 @@ public class LabFirst3DGame extends ApplicationAdapter implements InputProcessor
 		shader.setModelMatrix(ModelMatrix.main.getMatrix());
 		
 		Gdx.gl.glEnable(GL20.GL_DEPTH_TEST);
-		 
 		
-		cam = new Camera();
-		cam.look(new Point3D(0f, 6f, 0f), new Point3D(10,0.5f,10), new Vector3D(0,1,0));
-		
-		orthoCam = new Camera();
-		orthoCam.orthographicProjection(-10, 10, -10, 10, 3.0f, 100);
-		
-
 		// Initialize a new maze;
 		generator = new MazeGenerator(MAZE_WIDTH, MAZE_HEIGHT);
 		generator.init();
 		generator.generate();
 		nodes = generator.getNodes();
+		
+		cam = new Camera();
+		cam.look(new Point3D(WALL_THICKNESS, 1, WALL_THICKNESS), getStartingLookAt(), new Vector3D(0,1,0));
+		
+		orthoCam = new Camera();
+		orthoCam.orthographicProjection(-10, 10, -10, 10, 3.0f, 100);
+		
+		// Set the starting position of the mouse
+		lastMousePos = new Point2D(0, Gdx.graphics.getHeight());
 	}
 	
 	/**
@@ -102,28 +111,28 @@ public class LabFirst3DGame extends ApplicationAdapter implements InputProcessor
 			cam.pitch(-90.0f * deltaTime);
 		}
 		if(Gdx.input.isKeyPressed(Input.Keys.A)) {
-			cam.slide(-3.0f * deltaTime,  0,  0);
+			cam.slide(-CAMERA_SPEED * deltaTime,  0,  0);
 		}
 		if(Gdx.input.isKeyPressed(Input.Keys.D)) {
-			cam.slide(3.0f * deltaTime,  0, 0);
+			cam.slide(CAMERA_SPEED * deltaTime,  0, 0);
 		}
 		if(Gdx.input.isKeyPressed(Input.Keys.W)) {
-			cam.slide(0, 0, -3.0f * deltaTime);
+			cam.slide(0, 0, -CAMERA_SPEED * deltaTime);
 		}
 		if(Gdx.input.isKeyPressed(Input.Keys.S)) {
-			cam.slide(0, 0, 3.0f * deltaTime);
+			cam.slide(0, 0, CAMERA_SPEED * deltaTime);
 		}
 		if(Gdx.input.isKeyPressed(Input.Keys.R)) {
-			cam.slide(0, 3.0f * deltaTime, 0);
+			cam.slide(0, CAMERA_SPEED * deltaTime, 0);
 		}
 		if(Gdx.input.isKeyPressed(Input.Keys.F)) {
-			cam.slide(0, -3.0f * deltaTime, 0);
+			cam.slide(0, -CAMERA_SPEED * deltaTime, 0);
 		}
 		if(Gdx.input.isKeyPressed(Input.Keys.Q)) {
-			cam.roll(-90.0f * deltaTime);
+			cam.roll(-MOUSE_SENSITIVITY * deltaTime);
 		}
 		if(Gdx.input.isKeyPressed(Input.Keys.E)) {
-			cam.roll(90.0f * deltaTime);
+			cam.roll(MOUSE_SENSITIVITY * deltaTime);
 		}
 		
 		if(Gdx.input.isKeyPressed(Input.Keys.T)) {
@@ -176,9 +185,9 @@ public class LabFirst3DGame extends ApplicationAdapter implements InputProcessor
 			float s = (float)Math.sin(sunAngle * Math.PI / 180.0);
 			float c = (float)Math.cos(sunAngle * Math.PI / 180.0);
 			
-			shader.setLightPosition(12 + c * 10,  14.0f,  12 + s * 10,  1.0f);
-			shader.setLightDiffuse(0.0f,  1.0f,  1.0f,  1.0f);
-			shader.setLightSpecular(0.5f, 0.5f, 0.5f, 1.0f);
+			shader.setLightPosition(12 + 10,  14.0f,  12 + 10,  1.0f);
+			shader.setLightDiffuse(1.0f,  1.0f,  1.0f,  1.0f);
+			shader.setLightSpecular(1.0f, 1.0f, 1.0f, 1.0f);
 			shader.setMaterialShininess(20.0f);
 			shader.setMaterialSpecular(0.5f, 0.5f, 0.5f, 1.0f);
 			
@@ -193,8 +202,8 @@ public class LabFirst3DGame extends ApplicationAdapter implements InputProcessor
 			
 			ModelMatrix.main.pushMatrix();
 			shader.setMaterialDiffuse(Color.RED.r, Color.RED.g, Color.RED.b, 1.0f);
-			ModelMatrix.main.addTranslation(0.0f, -0.5f, 0.0f);
-			ModelMatrix.main.addScale(100.0f, 1.0f, 100.0f);
+			ModelMatrix.main.addTranslation((MAZE_WIDTH*3)/2, -0.5f, (MAZE_HEIGHT*3)/2);
+			ModelMatrix.main.addScale(MAZE_WIDTH*3, 1.0f, MAZE_HEIGHT*3);
 			shader.setModelMatrix(ModelMatrix.main.getMatrix());
 			BoxGraphic.drawSolidCube();
 			ModelMatrix.main.popMatrix();
@@ -203,6 +212,7 @@ public class LabFirst3DGame extends ApplicationAdapter implements InputProcessor
 				shader.setMaterialDiffuse(1.0f, 0.3f, 0.1f, 1.0f);
 				
 				ModelMatrix.main.pushMatrix();
+				shader.setMaterialDiffuse(Color.BLUE.r, Color.BLUE.g, Color.BLUE.b, 1.0f);
 				ModelMatrix.main.addTranslation(cam.eye.x, cam.eye.y, cam.eye.z);
 				shader.setModelMatrix(ModelMatrix.main.getMatrix());
 				BoxGraphic.drawSolidCube();
@@ -220,8 +230,8 @@ public class LabFirst3DGame extends ApplicationAdapter implements InputProcessor
 			for (int j = 0; j < MAZE_HEIGHT; j++) {
 				if (nodes[j + i * MAZE_WIDTH].c == '#') {
 					ModelMatrix.main.pushMatrix();
-					ModelMatrix.main.addTranslation(i, 1, j);
-					ModelMatrix.main.addScale(1.0f, 3.0f, 1.0f);
+					ModelMatrix.main.addTranslation(i*WALL_THICKNESS, 1, j*WALL_THICKNESS);
+					ModelMatrix.main.addScale(WALL_THICKNESS, WALL_HEIGHT, WALL_THICKNESS);
 					shader.setModelMatrix(ModelMatrix.main.getMatrix());
 					BoxGraphic.drawSolidCube();
 					ModelMatrix.main.popMatrix();
@@ -239,6 +249,15 @@ public class LabFirst3DGame extends ApplicationAdapter implements InputProcessor
 		//put the code inside the update and display methods, depending on the nature of the code
 		update();
 		display();
+	}
+	
+	private Point3D getStartingLookAt() {
+		if (nodes[1 + 2 * MAZE_WIDTH].c == ' ') {
+			System.out.println("first");
+			return new Point3D(2*WALL_THICKNESS, 1, WALL_THICKNESS);
+		}
+		System.out.println("second");
+		return new Point3D(WALL_THICKNESS, 1, 2*WALL_THICKNESS);
 	}
 
 	@Override
@@ -280,6 +299,26 @@ public class LabFirst3DGame extends ApplicationAdapter implements InputProcessor
 	@Override
 	public boolean mouseMoved(int screenX, int screenY) {
 		// TODO Auto-generated method stub
+		
+		float deltaTime = Gdx.graphics.getDeltaTime();
+		Point2D currMousePos = new Point2D(screenX, screenY);
+		
+		Point2D deltaMouse = currMousePos.subtract(lastMousePos);
+		lastMousePos = currMousePos;
+		
+		if(deltaMouse.x < 0) {
+			cam.yaw(MOUSE_SENSITIVITY * deltaTime * Math.abs(deltaMouse.x));
+		}
+		if(deltaMouse.x > 0) {
+			cam.yaw(-MOUSE_SENSITIVITY * deltaTime * Math.abs(deltaMouse.x));
+		}
+		if(deltaMouse.y < 0) {
+			cam.pitch(MOUSE_SENSITIVITY * deltaTime * Math.abs(deltaMouse.y));
+		}
+		if(deltaMouse.y > 0) {
+			cam.pitch(-MOUSE_SENSITIVITY * deltaTime * Math.abs(deltaMouse.y));
+		}
+		
 		return false;
 	}
 
