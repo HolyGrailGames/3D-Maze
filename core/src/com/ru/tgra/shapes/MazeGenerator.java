@@ -146,21 +146,6 @@ public class MazeGenerator {
 		//If nothing more can be done here - return parent's address
 		return n.parent;
 	}
-
-	void draw( )
-	{
-
-		//Outputs maze to terminal - nothing special
-		for (int i = 0; i < height; i++ )
-		{
-			for (int j = 0; j < width; j++ )
-			{
-				System.out.print(nodes[j + i * width].c + " ");
-			}
-			System.out.println();
-		}
-	}
-	
 	void generate() {
 
 		//Setup start node
@@ -170,7 +155,6 @@ public class MazeGenerator {
 		
 		//Connect nodes until start node is reached and can't be left
 		while ( ( last = link( last ) ) != start );
-		draw( );
 	}
 	
 	Node[] getNodes() {

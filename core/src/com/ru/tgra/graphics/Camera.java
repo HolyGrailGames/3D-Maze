@@ -8,7 +8,6 @@ import com.ru.tgra.utilities.Utilities;
 
 public class Camera 
 {
-	public boolean onElevator = false;
 	public Vector3D velocity;
 	public float speed;
 	public float jumpFactor;
@@ -76,7 +75,7 @@ public class Camera
 	
 	public void applyGravity(float deltaTime) {
 		
-		if (!onElevator && (eye.y > 1.0f || velocity.y > 0.0f)) {
+		if (eye.y > 1.0f || velocity.y > 0.0f) {
 			velocity.y -= GRAVITY * deltaTime;
 			eye.y += velocity.y * deltaTime * speed;
 		}

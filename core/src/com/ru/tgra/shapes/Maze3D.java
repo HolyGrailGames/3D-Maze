@@ -2,7 +2,10 @@ package com.ru.tgra.shapes;
 
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Random;
 
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
@@ -19,27 +22,45 @@ import com.ru.tgra.graphics.Point3D;
 import com.ru.tgra.graphics.Shader;
 import com.ru.tgra.graphics.Vector3D;
 import com.ru.tgra.utilities.Settings;
+import com.ru.tgra.utilities.Utilities;
 
 public class Maze3D extends ApplicationAdapter implements InputProcessor {
 	
 	private Camera cam;
 	private Camera orthoCam;
 	
-	public static BobbingBlock bobbingBlock;
+	//public static BobbingBlock bobbingBlock;
 	
 	public static Shader shader;
 	// Maze generating stuff
 	private MazeGenerator generator;
 	public static Node[] nodes;
-	private List<Wall> walls;
+	private List<Wall> walls = new ArrayList<>();
 	
 	private Point2D lastMousePos = null;
+	private Point3D playerStartPos = new Point3D();
+	private Point3D playerStartLookAt = new Point3D();
 	
 	private float fov = 90.0f;
+	
+	private String filename = null;
+	
+	Random rand = new Random();
+	
+	public static List<BobbingBlock> elevators = new ArrayList<>();
+	//public static List<Coin> coins = new ArrayList<>();
+	
+	public static HashMap<Integer, Coin> coins = new HashMap<>();
 
 	//private ModelMatrix modelMatrix;
 	
 	public static Point3D topLeft = new Point3D();
+	
+	public Maze3D(String filename) {
+		if (filename != null) {
+			this.filename = filename;
+		}
+	}
 
 	/**
 	 * Set up all data necessary to render scene.
@@ -48,7 +69,7 @@ public class Maze3D extends ApplicationAdapter implements InputProcessor {
 	public void create () {
 	
 		DisplayMode disp = Gdx.graphics.getDesktopDisplayMode();
-		Gdx.graphics.setDisplayMode(disp.width, disp.height, true);
+		//Gdx.graphics.setDisplayMode(disp.width, disp.height, true);
 		
 		Gdx.input.setInputProcessor(this);
 		Gdx.input.setCursorCatched(true);
@@ -83,20 +104,34 @@ public class Maze3D extends ApplicationAdapter implements InputProcessor {
 		Gdx.gl.glEnable(GL20.GL_DEPTH_TEST);
 		
 		// Initialize a new maze;
-		generator = new MazeGenerator(Settings.MAZE_WIDTH, Settings.MAZE_HEIGHT);
-		generator.init();
-		generator.generate();
-		nodes = generator.getNodes();
-		walls = new ArrayList<>();
-		initalizeWalls();
-		Point3D startingPos = getStartingLookAt();
-		bobbingBlock = new BobbingBlock(new Point3D(startingPos.x, -1.0f, startingPos.z), new Vector3D(Settings.WALL_THICKNESS, 4.5f, Settings.WALL_THICKNESS));
+		if (filename == null) {
+			System.out.println("Randomly Generating maze...");
+			generator = new MazeGenerator(Settings.MAZE_WIDTH, Settings.MAZE_HEIGHT);
+			generator.init();
+			generator.generate();
+			nodes = generator.getNodes();
+			fillMaze();
+			Utilities.writeNodesToFile(nodes, Settings.MAZE_WIDTH);
+			drawAscii(nodes);
+		}
+		else {
+			System.out.println("Reading maze from file...");
+			nodes = Utilities.readNodesFromFile(filename);
+			drawAscii(nodes);
+		}
+		
+		initializeMaze();
 		
 		cam = new Camera();
-		cam.look(new Point3D(Settings.WALL_THICKNESS, 1, Settings.WALL_THICKNESS), startingPos, new Vector3D(0,1,0));
-		
+		//cam.look(new Point3D(Settings.WALL_THICKNESS, 1, Settings.WALL_THICKNESS), lookAtPoint, new Vector3D(0,1,0));
+		cam.look(playerStartPos, playerStartLookAt, new Vector3D(0,1,0));
 		orthoCam = new Camera();
 		orthoCam.orthographicProjection(-10, 10, -10, 10, 3.0f, 100);
+		
+		
+		
+		
+		
 	}
 	
 	/**
@@ -172,6 +207,14 @@ public class Maze3D extends ApplicationAdapter implements InputProcessor {
 		cam.applyGravity(deltaTime);
 		input(deltaTime);
 		
+		for (BobbingBlock block : elevators) {
+			block.update(deltaTime);
+		}
+		for (Coin coin : coins.values()) {
+			coin.update(deltaTime);
+		}
+		
+		
 		Collisions.checkCollisions(cam);
 	}
 	
@@ -180,7 +223,6 @@ public class Maze3D extends ApplicationAdapter implements InputProcessor {
 	 */
 	private void display()
 	{
-		float deltaTime = Gdx.graphics.getDeltaTime();
 		//do all actual drawing and rendering here
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
 		
@@ -249,9 +291,13 @@ public class Maze3D extends ApplicationAdapter implements InputProcessor {
 			BoxGraphic.drawSolidCube();
 			ModelMatrix.main.popMatrix();
 			
-			// Draw a bobbing block at a corner of the maze.
-			bobbingBlock.update(deltaTime);
-			bobbingBlock.draw(Color.YELLOW, Color.YELLOW);
+			// Draw elevators
+			for (BobbingBlock block : elevators) {
+				block.draw(Color.YELLOW, Color.YELLOW);
+			}
+			for (Coin coin : coins.values()) {
+				coin.draw(Color.OLIVE, Color.YELLOW, Color.BLUE);
+			}
 			
 			if (viewNum == 1) {
 				shader.setMaterialDiffuse(1.0f, 0.3f, 0.1f, 1.0f);
@@ -317,10 +363,100 @@ public class Maze3D extends ApplicationAdapter implements InputProcessor {
 	}
 	
 	private Point3D getStartingLookAt() {
-		if (nodes[1 + 2 * Settings.MAZE_WIDTH].c == ' ') {
+		if (nodes[1 + 2 * Settings.MAZE_WIDTH].c == ' ' 
+				|| nodes[1 + 2 * Settings.MAZE_WIDTH].c == 'E'
+				|| nodes[1 + 2 * Settings.MAZE_WIDTH].c == 'c') {
+			nodes[1 + 2 * Settings.MAZE_WIDTH].c = 'c';
 			return new Point3D(2*Settings.WALL_THICKNESS, 1, Settings.WALL_THICKNESS);
 		}
+		nodes[2 + 1 * Settings.MAZE_WIDTH].c = 'E';
 		return new Point3D(Settings.WALL_THICKNESS, 1, 2*Settings.WALL_THICKNESS);
+	}
+	
+	private void fillMaze() {
+		nodes[1 + 1 * Settings.MAZE_WIDTH].c = 'P';
+		for (int i = 1; i < Settings.MAZE_HEIGHT-1; i++) {
+			// Set elevators
+				// get random int within the outer walls of the maze
+				int randIndex = rand.nextInt(Settings.MAZE_WIDTH-2)+1;
+				while (randIndex < Settings.MAZE_WIDTH-2 && nodes[randIndex + i * Settings.MAZE_WIDTH].c != ' ') {
+					randIndex++;
+				}
+				// Only set Elevator if we haven't hit the end of the width
+				if(nodes[randIndex + i * Settings.MAZE_WIDTH].c != '#') {
+					nodes[randIndex + i * Settings.MAZE_WIDTH].c = 'E';
+				}
+			
+			// set coins
+			for (int j = 1; j < Settings.MAZE_WIDTH-1; j++) {
+				// 33% chance to spawn a coin on in an empty cell
+				if (rand.nextInt(3) == 0 && nodes[j + i * Settings.MAZE_WIDTH].c == ' ') {
+					nodes[j + i * Settings.MAZE_WIDTH].c = 'c';
+				}
+			}
+        }
+	}
+	
+	private void initializeMaze() {
+		boolean playerIsSet = false;
+		for (int i = 0; i < Settings.MAZE_WIDTH; i++) {
+			for (int j = 0; j < Settings.MAZE_HEIGHT; j++) {
+				// Add wall
+				if (nodes[j + i * Settings.MAZE_WIDTH].c == '#') {
+					walls.add(new Wall(new Point3D(i * Settings.WALL_THICKNESS, 1, j * Settings.WALL_THICKNESS), 
+							new Vector3D(Settings.WALL_THICKNESS, Settings.WALL_HEIGHT, Settings.WALL_THICKNESS))); 
+				}
+				// Add elevator
+				if (nodes[j + i * Settings.MAZE_WIDTH].c == 'E') {
+					elevators.add(new BobbingBlock(new Point3D(i*Settings.WALL_THICKNESS, -1.0f, j*Settings.WALL_THICKNESS), new Vector3D(Settings.WALL_THICKNESS, 4.5f, Settings.WALL_THICKNESS)));
+				}
+				// Add coin
+				if (nodes[j + i * Settings.MAZE_WIDTH].c == 'c') {
+					coins.put(j+i*Settings.MAZE_WIDTH, new Coin(new Point3D(i*Settings.WALL_THICKNESS, 1.0f, j*Settings.WALL_THICKNESS)));
+				}
+				// Set player starting position and look at
+				if (!playerIsSet && nodes[j + i * Settings.MAZE_WIDTH].c == 'P') {
+					playerStartPos.set(i*Settings.WALL_THICKNESS, 1.0f, j*Settings.WALL_THICKNESS);
+					
+					if (i > 0 && i < Settings.MAZE_WIDTH && j > 0 && j < Settings.MAZE_HEIGHT) {
+						// Look left
+						if (Maze3D.nodes[j + (i-1) * Settings.MAZE_WIDTH].c != '#') {
+							playerStartLookAt.set((i-1)*Settings.WALL_THICKNESS, 1, j*Settings.WALL_THICKNESS);
+						}
+						// Look right
+						else if (Maze3D.nodes[j + (i+1) * Settings.MAZE_WIDTH].c != '#') {
+							playerStartLookAt.set((i+1)*Settings.WALL_THICKNESS, 1, j*Settings.WALL_THICKNESS);
+						}
+						// Look up
+						else if (Maze3D.nodes[(j-1) + i * Settings.MAZE_WIDTH].c != '#') {
+							playerStartLookAt.set(i*Settings.WALL_THICKNESS, 1, (j-1)*Settings.WALL_THICKNESS);
+						}
+						// Look down
+						else if (Maze3D.nodes[(j+1) + i * Settings.MAZE_WIDTH].c != '#') {
+							playerStartLookAt.set(i*Settings.WALL_THICKNESS, 1, (j+1)*Settings.WALL_THICKNESS);
+						}
+						System.out.println("("+playerStartLookAt.x+", "+playerStartLookAt.y+", "+playerStartLookAt.z+")");
+					}
+					else {
+						playerStartLookAt.set(playerStartPos.x+Settings.WALL_THICKNESS, 1, playerStartPos.z);
+					}
+					playerIsSet = true;
+				}
+			}
+		}
+	}
+	
+	void drawAscii(Node nodes[])
+	{
+		//Outputs maze to terminal - nothing special
+		for (int i = 0; i < Settings.MAZE_HEIGHT; i++ )
+		{
+			for (int j = 0; j < Settings.MAZE_WIDTH; j++ )
+			{
+				System.out.print(nodes[i + j * Settings.MAZE_HEIGHT].c + " ");
+			}
+			System.out.println();
+		}
 	}
 
 	@Override

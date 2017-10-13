@@ -15,6 +15,9 @@ public class DesktopLauncher {
 		config.y = 150;
 		//config.fullscreen = true;
 
-		new LwjglApplication(new Maze3D(), config);
+		// To load a custom map send in the filename to the Maze3D constructor.
+		// The file has to be under the assets folder
+		// example: new Maze3D("7x7.txt")
+		new LwjglApplication(new Maze3D(null), config);
 	}
 }

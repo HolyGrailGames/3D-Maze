@@ -3,6 +3,7 @@ package com.ru.tgra.collisions;
 import com.ru.tgra.graphics.Camera;
 import com.ru.tgra.graphics.Point3D;
 import com.ru.tgra.graphics.Vector3D;
+import com.ru.tgra.shapes.BobbingBlock;
 import com.ru.tgra.shapes.Maze3D;
 import com.ru.tgra.utilities.Settings;
 import com.ru.tgra.utilities.Utilities;
@@ -17,11 +18,14 @@ public class Collisions {
 	static Point3D bottomLeft  = new Point3D();
 	static Point3D bottomRight = new Point3D();
 	
+	static Point3D coinPosition = new Point3D();
+	
 	public static void checkCollisions(Camera cam) {
 		
 		int mazeX = (int) ((cam.eye.x+(Settings.WALL_THICKNESS/2)) / Settings.WALL_THICKNESS);
 		int mazeY = (int) ((cam.eye.z+(Settings.WALL_THICKNESS/2)) / Settings.WALL_THICKNESS);
 		
+		// Calculate bounding box around the cell that the player is currently in
 		leftBound   = mazeX*3 - (Settings.WALL_THICKNESS/2);
 		rightBound  = mazeX*3 + (Settings.WALL_THICKNESS/2);
 		topBound    = mazeY*3 - (Settings.WALL_THICKNESS/2);
@@ -31,8 +35,23 @@ public class Collisions {
 		
 		if (mazeX > 0 && mazeX < Settings.MAZE_WIDTH && mazeY > 0 && mazeY < Settings.MAZE_HEIGHT) {
 			
-			checkElevatorCollisions(cam);
+			// Check collision against elevators
+			for (BobbingBlock elevator : Maze3D.elevators) {
+				checkElevatorCollisions(elevator, cam);
+			}
 			
+			if (Maze3D.nodes[mazeY + mazeX * Settings.MAZE_WIDTH].c == 'c') {
+				coinPosition.set(mazeX*Settings.WALL_THICKNESS, 1.0f, mazeY*Settings.WALL_THICKNESS);
+				
+				if (Utilities.euclidianDistance(cam.eye, coinPosition) < cam.radius) {
+					if (Maze3D.coins.remove(mazeY + mazeX * Settings.MAZE_WIDTH) != null) {
+						Maze3D.nodes[mazeY + mazeX * Settings.MAZE_WIDTH].c = ' ';
+					}
+				}
+				
+			}
+			
+			// Check collision against walls
 			if (cam.eye.x-cam.radius < leftBound && Maze3D.nodes[mazeY + (mazeX-1) * Settings.MAZE_WIDTH].c == '#') {
 				cam.setEye(leftBound+cam.radius, cam.eye.y, cam.eye.z);
 				collision = true;
@@ -50,7 +69,7 @@ public class Collisions {
 				collision = true;
 			}
 			
-			// Only check the corners if we haven't collided yet
+			// Only check the corners of walls if we haven't collided with any walls yet
 			if (!collision) {
 				topLeft.set(leftBound, 1, topBound);
 				topRight.set(rightBound, 1, topBound);
@@ -82,13 +101,13 @@ public class Collisions {
 	}
 	
 	// We got help from Smari and Darri implementing this function
-	private static void checkElevatorCollisions(Camera cam) {
-		float maxX = Maze3D.bobbingBlock.position.x+Maze3D.bobbingBlock.scale.x/2+cam.radius;
-		float minX = Maze3D.bobbingBlock.position.x-Maze3D.bobbingBlock.scale.x/2-cam.radius;
-		float maxZ = Maze3D.bobbingBlock.position.z+Maze3D.bobbingBlock.scale.z/2+cam.radius;
-		float minZ = Maze3D.bobbingBlock.position.z-Maze3D.bobbingBlock.scale.z/2-cam.radius;
-		float maxY = Maze3D.bobbingBlock.position.y+Maze3D.bobbingBlock.scale.y/2+cam.radius;
-		float minY = Maze3D.bobbingBlock.position.y-Maze3D.bobbingBlock.scale.y/2-cam.radius;
+	private static void checkElevatorCollisions(BobbingBlock elevator, Camera cam) {
+		float maxX = elevator.position.x+elevator.scale.x/2+cam.radius;
+		float minX = elevator.position.x-elevator.scale.x/2-cam.radius;
+		float maxZ = elevator.position.z+elevator.scale.z/2+cam.radius;
+		float minZ = elevator.position.z-elevator.scale.z/2-cam.radius;
+		float maxY = elevator.position.y+elevator.scale.y/2+cam.radius;
+		float minY = elevator.position.y-elevator.scale.y/2-cam.radius;
 		
 		if(cam.eye.x >= minX && cam.eye.x <= maxX 
 				&& cam.eye.z >= minZ && cam.eye.z <= maxZ
@@ -127,15 +146,12 @@ public class Collisions {
 			if(d == 4){ cam.setEye(cam.eye.x, cam.eye.y, minZ); }
 			if(d == 5) { 
 				cam.setEye(cam.eye.x, maxY, cam.eye.z);
-				cam.onElevator = true;
+				cam.velocity.y = 0.0f;
 			}
 			if(d == 6) { 
 				cam.setEye(cam.eye.x, minY, cam.eye.z);
-				cam.onElevator = true;
+				cam.velocity.y = 0.0f;
 			}
-		}
-		else {
-			cam.onElevator = false;
 		}
 	}
 }
