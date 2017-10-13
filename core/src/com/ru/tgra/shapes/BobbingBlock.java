@@ -10,11 +10,6 @@ public class BobbingBlock
 	private Point3D startPos;
 	public Point3D position;
 	public Vector3D scale;
-	private boolean bob = false;
-	/*
-	private float bobFactor;
-	private float bobSpeed = 2.5f;
-	*/
 	
 	private float amplitude = 1.5f;
 	private float speed = 0.5f;
@@ -29,18 +24,8 @@ public class BobbingBlock
 	}
 	
 	public void update(float deltaTime) {
-		if (bob) {
-			time += deltaTime;
-			position.y = startPos.y + amplitude * (float)Math.sin(speed * time);
-		}
-		/*
-        bobFactor += deltaTime * bobSpeed;
-        position.y += Math.sin(bobFactor) * bobSpeed * deltaTime;
-        */
-	}
-	
-	public void bob() {
-		bob = !bob;
+		time += deltaTime;
+		position.y = startPos.y + amplitude * (float)Math.sin(speed * time);
 	}
 	
 	public void draw(Color diffuse, Color specular) {

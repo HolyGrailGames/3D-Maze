@@ -20,9 +20,6 @@ public class Collisions {
 		int mazeX = (int) ((cam.eye.x+(Settings.WALL_THICKNESS/2)) / Settings.WALL_THICKNESS);
 		int mazeY = (int) ((cam.eye.z+(Settings.WALL_THICKNESS/2)) / Settings.WALL_THICKNESS);
 		
-		int elevatorMazeX = (int) ((Maze3D.bobbingBlock.position.x+(Settings.WALL_THICKNESS/2)) / Settings.WALL_THICKNESS);
-		int elevatorMazeY = (int) ((Maze3D.bobbingBlock.position.z+(Settings.WALL_THICKNESS/2)) / Settings.WALL_THICKNESS);
-		
 		leftBound   = mazeX*3 - (Settings.WALL_THICKNESS/2);
 		rightBound  = mazeX*3 + (Settings.WALL_THICKNESS/2);
 		topBound    = mazeY*3 - (Settings.WALL_THICKNESS/2);
@@ -32,8 +29,6 @@ public class Collisions {
 		
 		if (mazeX > 0 && mazeX < Settings.MAZE_WIDTH && mazeY > 0 && mazeY < Settings.MAZE_HEIGHT) {
 			
-			/*if (mazeX == elevatorMazeX && mazeY == elevatorMazeY) {
-			}*/
 			checkElevatorCollisions(cam);
 			
 			if (cam.eye.x-cam.radius < leftBound && Maze3D.nodes[mazeY + (mazeX-1) * Settings.MAZE_WIDTH].c == '#') {
@@ -84,7 +79,7 @@ public class Collisions {
 		}
 	}
 	
-	// We got help from Smári and Darri implementing this function
+	// We got help from Smari and Darri implementing this function
 	private static void checkElevatorCollisions(Camera cam) {
 		float maxX = Maze3D.bobbingBlock.position.x+Maze3D.bobbingBlock.scale.x/2+cam.radius;
 		float minX = Maze3D.bobbingBlock.position.x-Maze3D.bobbingBlock.scale.x/2-cam.radius;

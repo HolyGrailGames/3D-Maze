@@ -22,7 +22,6 @@ import com.ru.tgra.utilities.Settings;
 
 public class Maze3D extends ApplicationAdapter implements InputProcessor {
 	
-	private float sunAngle;
 	private Camera cam;
 	private Camera orthoCam;
 	
@@ -49,7 +48,7 @@ public class Maze3D extends ApplicationAdapter implements InputProcessor {
 	public void create () {
 	
 		DisplayMode disp = Gdx.graphics.getDesktopDisplayMode();
-		//Gdx.graphics.setDisplayMode(disp.width, disp.height, true);
+		Gdx.graphics.setDisplayMode(disp.width, disp.height, true);
 		
 		Gdx.input.setInputProcessor(this);
 		Gdx.input.setCursorCatched(true);
@@ -90,12 +89,11 @@ public class Maze3D extends ApplicationAdapter implements InputProcessor {
 		nodes = generator.getNodes();
 		walls = new ArrayList<>();
 		initalizeWalls();
-		
-		Point3D startLookAt = getStartingLookAt();
-		bobbingBlock = new BobbingBlock(new Point3D(startLookAt.x, -1f, 1 * startLookAt.z), new Vector3D(Settings.WALL_THICKNESS, 4.5f, Settings.WALL_THICKNESS));
+		Point3D startingPos = getStartingLookAt();
+		bobbingBlock = new BobbingBlock(new Point3D(startingPos.x, -1.0f, startingPos.z), new Vector3D(Settings.WALL_THICKNESS, 4.5f, Settings.WALL_THICKNESS));
 		
 		cam = new Camera();
-		cam.look(new Point3D(Settings.WALL_THICKNESS, 1, Settings.WALL_THICKNESS), startLookAt, new Vector3D(0,1,0));
+		cam.look(new Point3D(Settings.WALL_THICKNESS, 1, Settings.WALL_THICKNESS), startingPos, new Vector3D(0,1,0));
 		
 		orthoCam = new Camera();
 		orthoCam.orthographicProjection(-10, 10, -10, 10, 3.0f, 100);
@@ -113,12 +111,14 @@ public class Maze3D extends ApplicationAdapter implements InputProcessor {
 		if(Gdx.input.isKeyPressed(Input.Keys.RIGHT)) {
 			cam.yaw(-90.0f * deltaTime);
 		}
+		/*
 		if(Gdx.input.isKeyPressed(Input.Keys.UP)) {
 			cam.pitch(90.0f * deltaTime);
 		}
 		if(Gdx.input.isKeyPressed(Input.Keys.DOWN)) {
 			cam.pitch(-90.0f * deltaTime);
 		}
+		*/
 		if(Gdx.input.isKeyPressed(Input.Keys.A)) {
 			cam.slide(-Settings.CAMERA_SPEED * deltaTime,  0,  0);
 		}
@@ -131,33 +131,32 @@ public class Maze3D extends ApplicationAdapter implements InputProcessor {
 		if(Gdx.input.isKeyPressed(Input.Keys.S)) {
 			cam.slide(0, 0, Settings.CAMERA_SPEED * deltaTime);
 		}
+		/*
 		if(Gdx.input.isKeyPressed(Input.Keys.R)) {
 			cam.slide(0, Settings.CAMERA_SPEED * deltaTime, 0);
 		}
 		if(Gdx.input.isKeyPressed(Input.Keys.F)) {
 			cam.slide(0, -Settings.CAMERA_SPEED * deltaTime, 0);
 		}
+		
 		if(Gdx.input.isKeyPressed(Input.Keys.Q)) {
 			cam.roll(-Settings.MOUSE_SENSITIVITY * deltaTime);
 		}
 		if(Gdx.input.isKeyPressed(Input.Keys.E)) {
 			cam.roll(Settings.MOUSE_SENSITIVITY * deltaTime);
 		}
-		
 		if(Gdx.input.isKeyPressed(Input.Keys.T)) {
 			fov -= 30.0f * deltaTime;
 		}
 		if(Gdx.input.isKeyPressed(Input.Keys.G)) {
 			fov += 30.0f * deltaTime;
 		}
+		*/
 		if(Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) {
 			Gdx.graphics.setDisplayMode(500, 500, false);
 			Gdx.app.exit();
 		}
 		
-		if(Gdx.input.isKeyJustPressed(Input.Keys.B)) {
-			bobbingBlock.bob();
-		}
 	}
 	
 	/**
@@ -166,8 +165,6 @@ public class Maze3D extends ApplicationAdapter implements InputProcessor {
 	private void update()
 	{
 		float deltaTime = Gdx.graphics.getDeltaTime();
-
-		sunAngle += 90.0f * deltaTime;
 		
 		input(deltaTime);
 		
