@@ -22,11 +22,10 @@ import com.ru.tgra.utilities.Settings;
 
 public class Maze3D extends ApplicationAdapter implements InputProcessor {
 	
-	private float sunAngle;
 	private Camera cam;
 	private Camera orthoCam;
 	
-	private BobbingBlock bobbingBlock;
+	public static BobbingBlock bobbingBlock;
 	
 	public static Shader shader;
 	// Maze generating stuff
@@ -49,7 +48,7 @@ public class Maze3D extends ApplicationAdapter implements InputProcessor {
 	public void create () {
 	
 		DisplayMode disp = Gdx.graphics.getDesktopDisplayMode();
-		//Gdx.graphics.setDisplayMode(disp.width, disp.height, true);
+		Gdx.graphics.setDisplayMode(disp.width, disp.height, true);
 		
 		Gdx.input.setInputProcessor(this);
 		Gdx.input.setCursorCatched(true);
@@ -90,10 +89,11 @@ public class Maze3D extends ApplicationAdapter implements InputProcessor {
 		nodes = generator.getNodes();
 		walls = new ArrayList<>();
 		initalizeWalls();
-		bobbingBlock = new BobbingBlock(new Point3D(1 * Settings.WALL_THICKNESS, 1.0f, 2 * Settings.WALL_THICKNESS), new Vector3D(1.0f, 1.0f, 1.0f));
+		Point3D startingPos = getStartingLookAt();
+		bobbingBlock = new BobbingBlock(new Point3D(startingPos.x, -1.0f, startingPos.z), new Vector3D(Settings.WALL_THICKNESS, 4.5f, Settings.WALL_THICKNESS));
 		
 		cam = new Camera();
-		cam.look(new Point3D(Settings.WALL_THICKNESS, 1, Settings.WALL_THICKNESS), getStartingLookAt(), new Vector3D(0,1,0));
+		cam.look(new Point3D(Settings.WALL_THICKNESS, 1, Settings.WALL_THICKNESS), startingPos, new Vector3D(0,1,0));
 		
 		orthoCam = new Camera();
 		orthoCam.orthographicProjection(-10, 10, -10, 10, 3.0f, 100);
@@ -164,8 +164,6 @@ public class Maze3D extends ApplicationAdapter implements InputProcessor {
 	private void update()
 	{
 		float deltaTime = Gdx.graphics.getDeltaTime();
-
-		sunAngle += 90.0f * deltaTime;
 		
 		input(deltaTime);
 		
