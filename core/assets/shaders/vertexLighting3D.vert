@@ -25,12 +25,6 @@ uniform vec4 u_light2Position;
 uniform vec4 u_light3Position;
 uniform vec4 u_light4Position;
 
-// The direction the lights are facing
-uniform vec4 u_light1Direction;
-uniform vec4 u_light2Direction;
-uniform vec4 u_light3Direction;
-uniform vec4 u_light4Direction;
-
 // The diffuse part of the lights. Diffuse reflection 
 // is the reflection of light or other waves or particles from 
 // a surface such that a ray incident on the surface is scattered at many 
