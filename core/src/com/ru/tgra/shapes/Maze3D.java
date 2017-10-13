@@ -111,12 +111,14 @@ public class Maze3D extends ApplicationAdapter implements InputProcessor {
 		if(Gdx.input.isKeyPressed(Input.Keys.RIGHT)) {
 			cam.yaw(-90.0f * deltaTime);
 		}
+		/*
 		if(Gdx.input.isKeyPressed(Input.Keys.UP)) {
 			cam.pitch(90.0f * deltaTime);
 		}
 		if(Gdx.input.isKeyPressed(Input.Keys.DOWN)) {
 			cam.pitch(-90.0f * deltaTime);
 		}
+		*/
 		if(Gdx.input.isKeyPressed(Input.Keys.A)) {
 			cam.slide(-Settings.CAMERA_SPEED * deltaTime,  0,  0);
 		}
@@ -129,25 +131,27 @@ public class Maze3D extends ApplicationAdapter implements InputProcessor {
 		if(Gdx.input.isKeyPressed(Input.Keys.S)) {
 			cam.slide(0, 0, Settings.CAMERA_SPEED * deltaTime);
 		}
+		/*
 		if(Gdx.input.isKeyPressed(Input.Keys.R)) {
 			cam.slide(0, Settings.CAMERA_SPEED * deltaTime, 0);
 		}
 		if(Gdx.input.isKeyPressed(Input.Keys.F)) {
 			cam.slide(0, -Settings.CAMERA_SPEED * deltaTime, 0);
 		}
+		
 		if(Gdx.input.isKeyPressed(Input.Keys.Q)) {
 			cam.roll(-Settings.MOUSE_SENSITIVITY * deltaTime);
 		}
 		if(Gdx.input.isKeyPressed(Input.Keys.E)) {
 			cam.roll(Settings.MOUSE_SENSITIVITY * deltaTime);
 		}
-		
 		if(Gdx.input.isKeyPressed(Input.Keys.T)) {
 			fov -= 30.0f * deltaTime;
 		}
 		if(Gdx.input.isKeyPressed(Input.Keys.G)) {
 			fov += 30.0f * deltaTime;
 		}
+		*/
 		if(Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) {
 			Gdx.graphics.setDisplayMode(500, 500, false);
 			Gdx.app.exit();
