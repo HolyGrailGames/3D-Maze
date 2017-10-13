@@ -131,6 +131,10 @@ public class Maze3D extends ApplicationAdapter implements InputProcessor {
 		if(Gdx.input.isKeyPressed(Input.Keys.S)) {
 			cam.slide(0, 0, Settings.CAMERA_SPEED * deltaTime);
 		}
+		if (Gdx.input.isKeyJustPressed(Input.Keys.SPACE)) {
+			cam.jump();
+		}
+		
 		/*
 		if(Gdx.input.isKeyPressed(Input.Keys.R)) {
 			cam.slide(0, Settings.CAMERA_SPEED * deltaTime, 0);
@@ -165,7 +169,7 @@ public class Maze3D extends ApplicationAdapter implements InputProcessor {
 	private void update()
 	{
 		float deltaTime = Gdx.graphics.getDeltaTime();
-		
+		cam.applyGravity(deltaTime);
 		input(deltaTime);
 		
 		Collisions.checkCollisions(cam);

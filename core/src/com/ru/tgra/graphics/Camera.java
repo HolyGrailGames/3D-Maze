@@ -8,11 +8,16 @@ import com.ru.tgra.utilities.Utilities;
 
 public class Camera 
 {
-	
+	public boolean onElevator = false;
+	public Vector3D velocity;
+	public float speed;
+	public float jumpFactor;
 	public Point3D eye;
 	Vector3D u;
 	Vector3D v;
 	Vector3D n;
+	
+	private static final float GRAVITY = 9.81f;
 	
 	public Point3D north, east, south, west;
 	
@@ -25,7 +30,7 @@ public class Camera
 	float near;
 	float far;
 	
-	public float radius = 0.6f;
+	public float radius = 0.7f;
 	
 	private FloatBuffer matrixBuffer;
 	
@@ -38,6 +43,10 @@ public class Camera
 		n = new Vector3D(0, 0, 1);
 		
 		orthographic = true;
+		
+		velocity = new Vector3D();
+		speed = 1.1f;
+		jumpFactor = 3.5f;
 		
 		this.left = -1;
 		this.right = 1;
@@ -63,6 +72,17 @@ public class Camera
 		n.normalize();
 		u.normalize();
 		v = n.cross(u);
+	}
+	
+	public void applyGravity(float deltaTime) {
+		
+		if (!onElevator && (eye.y > 1.0f || velocity.y > 0.0f)) {
+			velocity.y -= GRAVITY * deltaTime;
+			eye.y += velocity.y * deltaTime * speed;
+		}
+		else {
+			velocity.y = 0.0f;
+		}
 	}
 	
 	public void setEye(float x, float y, float z) {
@@ -172,4 +192,10 @@ public class Camera
 		
 		return matrixBuffer;
 	}
-}
+	
+	public void jump() {
+		if (eye.y <= 1.0f) {
+			velocity.y += jumpFactor;
+		}
+	}
+ }

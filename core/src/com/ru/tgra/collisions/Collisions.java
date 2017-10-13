@@ -9,6 +9,8 @@ import com.ru.tgra.utilities.Utilities;
 
 public class Collisions {
 	
+	
+	
 	static float leftBound, rightBound, topBound, bottomBound;
 	static Point3D topLeft     = new Point3D();
 	static Point3D topRight    = new Point3D();
@@ -91,40 +93,49 @@ public class Collisions {
 		if(cam.eye.x >= minX && cam.eye.x <= maxX 
 				&& cam.eye.z >= minZ && cam.eye.z <= maxZ
 				&& cam.eye.y >= minY && cam.eye.y <= maxY){
-				float minDis = Integer.MAX_VALUE;
-				int d = 0;
-				
-				if(Math.abs(maxX-cam.eye.x) < minDis) {
-					minDis = Math.abs(maxX-cam.eye.x);
-					d = 1;
-				}
-				if(Math.abs(minX-cam.eye.x) < minDis) {
-					minDis = Math.abs(minX-cam.eye.x);
-					d = 2;
-				}
-				if(Math.abs(maxZ-cam.eye.z) < minDis) {
-					minDis = Math.abs(maxZ-cam.eye.z);
-					d = 3;
-				}
-				if(Math.abs(minZ-cam.eye.z) < minDis) {
-					minDis = Math.abs(minZ-cam.eye.z);
-					d = 4;
-				}
-				if(Math.abs(maxY-cam.eye.y) < minDis) {
-					minDis = Math.abs(maxY-cam.eye.y);
-					d = 5;
-				}
-				if(Math.abs(minY-cam.eye.y) < minDis) {
-					minDis = Math.abs(minY-cam.eye.y);
-					d = 6;
-				}
-				
-				if(d == 1){ cam.setEye(maxX, cam.eye.y, cam.eye.z); }
-				if(d == 2){ cam.setEye(minX, cam.eye.y, cam.eye.z); }
-				if(d == 3){ cam.setEye(cam.eye.x, cam.eye.y, maxZ); }
-				if(d == 4){ cam.setEye(cam.eye.x, cam.eye.y, minZ); }
-				if(d == 5){ cam.setEye(cam.eye.x, maxY, cam.eye.z); }
-				if(d == 6){ cam.setEye(cam.eye.x, minY, cam.eye.z); }
+			float minDis = Integer.MAX_VALUE;
+			int d = 0;
+			
+			if(Math.abs(maxX-cam.eye.x) < minDis) {
+				minDis = Math.abs(maxX-cam.eye.x);
+				d = 1;
 			}
+			if(Math.abs(minX-cam.eye.x) < minDis) {
+				minDis = Math.abs(minX-cam.eye.x);
+				d = 2;
+			}
+			if(Math.abs(maxZ-cam.eye.z) < minDis) {
+				minDis = Math.abs(maxZ-cam.eye.z);
+				d = 3;
+			}
+			if(Math.abs(minZ-cam.eye.z) < minDis) {
+				minDis = Math.abs(minZ-cam.eye.z);
+				d = 4;
+			}
+			if(Math.abs(maxY-cam.eye.y) < minDis) {
+				minDis = Math.abs(maxY-cam.eye.y);
+				d = 5;
+			}
+			if(Math.abs(minY-cam.eye.y) < minDis) {
+				minDis = Math.abs(minY-cam.eye.y);
+				d = 6;
+			}
+			
+			if(d == 1){ cam.setEye(maxX, cam.eye.y, cam.eye.z); }
+			if(d == 2){ cam.setEye(minX, cam.eye.y, cam.eye.z); }
+			if(d == 3){ cam.setEye(cam.eye.x, cam.eye.y, maxZ); }
+			if(d == 4){ cam.setEye(cam.eye.x, cam.eye.y, minZ); }
+			if(d == 5) { 
+				cam.setEye(cam.eye.x, maxY, cam.eye.z);
+				cam.onElevator = true;
+			}
+			if(d == 6) { 
+				cam.setEye(cam.eye.x, minY, cam.eye.z);
+				cam.onElevator = true;
+			}
+		}
+		else {
+			cam.onElevator = false;
+		}
 	}
 }

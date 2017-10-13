@@ -26,7 +26,9 @@ None of these lights have any ambient values, although there is a global ambienc
     Mouse to look around(left/right) 
 
 ## Objects
-We have an elevator in the maze, and, believe it or not, it elevates you!
+We have an elevator in the maze, and, believe it or not, it elevates you! It spawns right next to the players starting point in the maze to make sure you can experience the fun!
+
+Unfortunately, there is not much more in the maze to do.
 
 ## Collisions:
     We figure out which cell we are in, and use that to check only against adjacent walls. If no collision is found, we check for diagonal collisions against the corners using a slightly different fornmula. 
