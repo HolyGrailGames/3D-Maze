@@ -435,7 +435,6 @@ public class Maze3D extends ApplicationAdapter implements InputProcessor {
 						else if (Maze3D.nodes[(j+1) + i * Settings.MAZE_WIDTH].c != '#') {
 							playerStartLookAt.set(i*Settings.WALL_THICKNESS, 1, (j+1)*Settings.WALL_THICKNESS);
 						}
-						System.out.println("("+playerStartLookAt.x+", "+playerStartLookAt.y+", "+playerStartLookAt.z+")");
 					}
 					else {
 						playerStartLookAt.set(playerStartPos.x+Settings.WALL_THICKNESS, 1, playerStartPos.z);

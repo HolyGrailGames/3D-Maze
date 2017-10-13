@@ -49,24 +49,17 @@ public class Utilities
 	        nodes = new Node[Settings.MAZE_WIDTH * Settings.MAZE_HEIGHT];
 	        
 	        scanner.useDelimiter("");
-	        // remove first trailing newline
-	        char next = scanner.next().charAt(0);
 	        
+	        // Go to next line which is the start of the maze
+	        scanner.nextLine();
 	        
-	        for (int i = 0; i < Settings.MAZE_HEIGHT; i++) {
-	        	int j = 0;
-	        	next = scanner.next().charAt(0);
-	        	while (next != '\n') {
-	        		
+	        for (int i = 0; i < size; i++) {
+	        	for (int j = 0; j < size; j++) {
 	        		Node node = new Node();
-	        		node.c = next;
+	        		node.c =  scanner.next().charAt(0);
 	        		nodes[i + j * Settings.MAZE_HEIGHT] = node;
-	        		if (!scanner.hasNext()) {
-	        			break;
-	        		}
-	        		next = scanner.next().charAt(0);
-	        		j++;
 	        	}
+	        	scanner.nextLine();
 	        }
 	        scanner.close();
 	    } catch (IOException e) {
