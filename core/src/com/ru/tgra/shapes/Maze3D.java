@@ -26,7 +26,7 @@ public class Maze3D extends ApplicationAdapter implements InputProcessor {
 	private Camera cam;
 	private Camera orthoCam;
 	
-	private BobbingBlock bobbingBlock;
+	public static BobbingBlock bobbingBlock;
 	
 	public static Shader shader;
 	// Maze generating stuff
@@ -90,10 +90,12 @@ public class Maze3D extends ApplicationAdapter implements InputProcessor {
 		nodes = generator.getNodes();
 		walls = new ArrayList<>();
 		initalizeWalls();
-		bobbingBlock = new BobbingBlock(new Point3D(1 * Settings.WALL_THICKNESS, 1.0f, 2 * Settings.WALL_THICKNESS), new Vector3D(1.0f, 1.0f, 1.0f));
+		
+		Point3D startLookAt = getStartingLookAt();
+		bobbingBlock = new BobbingBlock(new Point3D(startLookAt.x, -1f, 1 * startLookAt.z), new Vector3D(Settings.WALL_THICKNESS, 4.5f, Settings.WALL_THICKNESS));
 		
 		cam = new Camera();
-		cam.look(new Point3D(Settings.WALL_THICKNESS, 1, Settings.WALL_THICKNESS), getStartingLookAt(), new Vector3D(0,1,0));
+		cam.look(new Point3D(Settings.WALL_THICKNESS, 1, Settings.WALL_THICKNESS), startLookAt, new Vector3D(0,1,0));
 		
 		orthoCam = new Camera();
 		orthoCam.orthographicProjection(-10, 10, -10, 10, 3.0f, 100);
@@ -151,6 +153,10 @@ public class Maze3D extends ApplicationAdapter implements InputProcessor {
 		if(Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) {
 			Gdx.graphics.setDisplayMode(500, 500, false);
 			Gdx.app.exit();
+		}
+		
+		if(Gdx.input.isKeyJustPressed(Input.Keys.B)) {
+			bobbingBlock.bob();
 		}
 	}
 	
